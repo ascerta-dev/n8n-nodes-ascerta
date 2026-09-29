@@ -29,7 +29,7 @@
       },
       "id": "ascerta-1",
       "name": "Ascerta Proxy",
-      "type": "n8n-nodes-ascerta.ascerta",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [220, 300],
       "credentials": {

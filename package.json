@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-ascerta",
+	"name": "@ascerta/n8n-nodes-ascerta",
 	"version": "1.0.5",
 	"description": "n8n community node for routing LLM requests through Ascerta proxy with cost tracking and budget enforcement",
 	"keywords": [
@@ -21,7 +21,10 @@
 		"type": "git",
 		"url": "https://github.com/ascerta-dev/n8n-nodes-ascerta"
 	},
-	"main": "index.js",
+	"main": "dist/nodes/Ascerta/Ascerta.node.js",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
 		"build": "npm run clean && tsc && node scripts/copy-icons.js",

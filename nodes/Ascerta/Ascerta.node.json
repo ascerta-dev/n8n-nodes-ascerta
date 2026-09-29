@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-ascerta.ascerta",
+	"node": "@ascerta/n8n-nodes-ascerta.ascerta",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Utility"],

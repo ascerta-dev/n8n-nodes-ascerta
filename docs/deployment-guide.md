@@ -1,4 +1,4 @@
-# Deployment & Configuration Guide — n8n-nodes-ascerta
+# Deployment & Configuration Guide — @ascerta/n8n-nodes-ascerta
 
 **Audience:** ITOps engineers and workflow builders deploying Ascerta community nodes on a self-hosted n8n instance.
 
@@ -60,7 +60,7 @@ This is the simplest path for instances managed through the n8n web interface.
 
 1. Open n8n and go to **Settings > Community Nodes**.
 2. Click **Install**.
-3. Enter the package name: `n8n-nodes-ascerta`
+3. Enter the package name: `@ascerta/n8n-nodes-ascerta`
 4. Accept the community node security prompt.
 5. Click **Install** to confirm.
 6. **Restart n8n.** The node is not available until the process restarts.
@@ -76,7 +76,7 @@ For teams managing n8n via Docker, bake the package into your image so every con
 ```dockerfile
 FROM n8nio/n8n:latest
 USER root
-RUN cd /usr/local/lib/node_modules/n8n && npm install n8n-nodes-ascerta
+RUN cd /usr/local/lib/node_modules/n8n && npm install @ascerta/n8n-nodes-ascerta
 USER node
 RUN rm -rf /home/node/.n8n/.cache
 ```
@@ -363,7 +363,7 @@ If the table above doesn't resolve your issue, contact Ascerta support with the 
 
 **When reporting an issue, include:**
 
-- `n8n-nodes-ascerta` package version (from `package.json` or `npm list n8n-nodes-ascerta`)
+- `@ascerta/n8n-nodes-ascerta` package version (from `package.json` or `npm list @ascerta/n8n-nodes-ascerta`)
 - n8n version (`n8n --version` or the version shown in n8n Settings)
 - The Debug Log output from the failing execution (mask your API key — `pi_live_****` is fine)
 - The full error message or HTTP status code

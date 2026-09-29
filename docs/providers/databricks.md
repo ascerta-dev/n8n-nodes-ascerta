@@ -10,7 +10,7 @@ Routes Databricks Model Serving chat model requests through the Ascerta proxy fo
 |----------|-------|
 | Display Name | Ascerta Databricks (Proxy) |
 | Node Name | `lmChatAscertaDatabricks` |
-| n8n Type | `n8n-nodes-ascerta.lmChatAscertaDatabricks` |
+| n8n Type | `@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks` |
 | LangChain Class | `ChatOpenAI` (`@langchain/openai`) |
 | Proxy Path | `/api/v1/proxy/openai/v1` (reuses OpenAI path) |
 

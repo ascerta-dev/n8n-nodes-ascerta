@@ -67,7 +67,7 @@
       },
       "id": "ascerta-1",
       "name": "Generate Response via Ascerta",
-      "type": "n8n-nodes-ascerta.ascerta",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [480, 300],
       "credentials": {

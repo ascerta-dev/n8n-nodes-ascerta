@@ -8,7 +8,7 @@ Routes Anthropic Claude chat model requests through the Ascerta proxy for cost t
 |----------|-------|
 | Display Name | Ascerta Anthropic (Proxy) |
 | Node Name | `lmChatAscertaAnthropic` |
-| n8n Type | `n8n-nodes-ascerta.lmChatAscertaAnthropic` |
+| n8n Type | `@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic` |
 | LangChain Class | `ChatAnthropic` (`@langchain/anthropic`) |
 | Proxy Path | `/api/v1/proxy/anthropic` |
 

@@ -8,7 +8,7 @@ Routes Amazon Bedrock chat model requests through the Ascerta proxy for cost tra
 |----------|-------|
 | Display Name | Ascerta Amazon Bedrock (Proxy) |
 | Node Name | `lmChatAscertaBedrock` |
-| n8n Type | `n8n-nodes-ascerta.lmChatAscertaBedrock` |
+| n8n Type | `@ascerta/n8n-nodes-ascerta.lmChatAscertaBedrock` |
 | LangChain Class | `ChatBedrockConverse` (`@langchain/aws`) |
 | Proxy Path | `/api/v1/proxy/aws.bedrock` |
 

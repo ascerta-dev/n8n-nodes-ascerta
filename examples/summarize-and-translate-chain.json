@@ -61,7 +61,7 @@
       },
       "id": "ascerta-summarize",
       "name": "Step 1: Summarize",
-      "type": "n8n-nodes-ascerta.ascerta",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [480, 300],
       "credentials": {
@@ -120,7 +120,7 @@
       },
       "id": "ascerta-translate",
       "name": "Step 2: Translate",
-      "type": "n8n-nodes-ascerta.ascerta",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [920, 300],
       "credentials": {

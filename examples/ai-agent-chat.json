@@ -35,7 +35,7 @@
       },
       "id": "ascerta-chat-1",
       "name": "Ascerta Chat Model",
-      "type": "n8n-nodes-ascerta.lmChatAscerta",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
       "typeVersion": 1,
       "position": [220, 520],
       "credentials": {

@@ -8,7 +8,7 @@ Routes Azure OpenAI (Azure AI Foundry) chat model requests through the Ascerta p
 |----------|-------|
 | Display Name | Ascerta Azure AI Foundry (Proxy) |
 | Node Name | `lmChatAscertaAzure` |
-| n8n Type | `n8n-nodes-ascerta.lmChatAscertaAzure` |
+| n8n Type | `@ascerta/n8n-nodes-ascerta.lmChatAscertaAzure` |
 | LangChain Class | `ChatOpenAI` (`@langchain/openai`) |
 | Proxy Path | `/api/v1/proxy/azure.openai` |
 

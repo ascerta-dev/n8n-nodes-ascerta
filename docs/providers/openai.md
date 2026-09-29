@@ -8,7 +8,7 @@ Routes OpenAI chat model requests through the Ascerta proxy for cost tracking, b
 |----------|-------|
 | Display Name | Ascerta OpenAI (Proxy) |
 | Node Name | `lmChatAscerta` |
-| n8n Type | `n8n-nodes-ascerta.lmChatAscerta` |
+| n8n Type | `@ascerta/n8n-nodes-ascerta.lmChatAscerta` |
 | LangChain Class | `ChatOpenAI` (`@langchain/openai`) |
 | Proxy Path | `/api/v1/proxy/openai/v1` |
 

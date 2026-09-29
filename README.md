@@ -1,4 +1,4 @@
-# n8n-nodes-ascerta
+# @ascerta/n8n-nodes-ascerta
 
 n8n community node for [Ascerta](https://ascerta.com) — add cost tracking, budget enforcement, and usage attribution to every LLM call in your n8n workflows.
 
@@ -41,14 +41,14 @@ These nodes plug directly into n8n's **AI Agent** node as a chat model input. Ea
 
 1. In your n8n instance, go to **Settings > Community Nodes**
 2. Select **Install a community node**
-3. Enter `n8n-nodes-ascerta`
+3. Enter `@ascerta/n8n-nodes-ascerta`
 4. Agree to the risks and click **Install**
 
 ### Manual Installation
 
 ```bash
 cd ~/.n8n/nodes
-npm install n8n-nodes-ascerta
+npm install @ascerta/n8n-nodes-ascerta
 ```
 
 Restart n8n after installing.
@@ -146,7 +146,7 @@ npm run format    # Prettier
 
 ```bash
 npm pack
-cd ~/.n8n/nodes && npm install /path/to/n8n-nodes-ascerta-*.tgz
+cd ~/.n8n/nodes && npm install /path/to/ascerta-n8n-nodes-ascerta-*.tgz
 rm -rf ~/.n8n/.cache   # Clear n8n cache after updates
 # Restart n8n
 ```

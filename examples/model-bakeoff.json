@@ -55,7 +55,7 @@
       },
       "id": "ascerta-openai",
       "name": "OpenAI via Ascerta",
-      "type": "n8n-nodes-ascerta.ascerta",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [480, 160],
       "credentials": {
@@ -86,7 +86,7 @@
       },
       "id": "ascerta-anthropic",
       "name": "Anthropic via Ascerta",
-      "type": "n8n-nodes-ascerta.ascerta",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [480, 440],
       "credentials": {

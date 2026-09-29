@@ -1,8 +1,8 @@
-# CLAUDE.md — n8n-nodes-ascerta
+# CLAUDE.md — @ascerta/n8n-nodes-ascerta
 
 ## What This Is
 
-n8n community node package for routing LLM requests through Ascerta proxy with cost tracking and budget enforcement. Published to npm as `n8n-nodes-ascerta`.
+n8n community node package for routing LLM requests through Ascerta proxy with cost tracking and budget enforcement. Published to npm as `@ascerta/n8n-nodes-ascerta`.
 
 ## Stack
 
@@ -52,7 +52,7 @@ docs/
 
 ```bash
 npm pack
-cd ~/.n8n/nodes && npm install /path/to/n8n-nodes-ascerta-*.tgz
+cd ~/.n8n/nodes && npm install /path/to/ascerta-n8n-nodes-ascerta-*.tgz
 rm -rf ~/.n8n/.cache   # Clear n8n cache
 # Restart n8n
 ```
