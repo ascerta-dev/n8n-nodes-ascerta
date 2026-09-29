@@ -14,7 +14,7 @@ export const providerFields: INodeProperties[] = [
 			{ name: 'Databricks', value: 'databricks' },
 		],
 		default: 'openai',
-		description: 'The LLM provider to route through Pay-i',
+		description: 'The LLM provider to route through Ascerta',
 	},
 	{
 		displayName: 'Model Provider API Key',

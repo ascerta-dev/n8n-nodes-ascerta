@@ -18,12 +18,12 @@ import { sanitizeHeaderValue } from './utils/headers';
 // Runtime-only modules provided by n8n's VM context — not available at compile time.
 declare function require(module: string): any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-const PAYI_DEBUG_LOG = path.join(process.env.HOME || '/tmp', '.n8n', 'payi-databricks-debug.log');
-const PAYI_FILE_DEBUG_ENABLED = process.env.PAYI_FILE_DEBUG === '1';
+const ASCERTA_DEBUG_LOG = path.join(process.env.HOME || '/tmp', '.n8n', 'ascerta-databricks-debug.log');
+const ASCERTA_FILE_DEBUG_ENABLED = process.env.ASCERTA_FILE_DEBUG === '1';
 
-// Mask sensitive keys before they hit disk. payiLog dumps full request/response
-// JSON which includes credential headers — without this, Pay-i and provider keys
-// land in plaintext in payi-databricks-debug.log.
+// Mask sensitive keys before they hit disk. ascertaLog dumps full request/response
+// JSON which includes credential headers — without this, Ascerta and provider keys
+// land in plaintext in ascerta-databricks-debug.log.
 const SENSITIVE_KEYS = ['xProxy-Api-Key', 'Authorization', 'apiKey', 'api_key', 'openai_api_key'];
 const SECRET_PATTERNS: ReadonlyArray<RegExp> = SENSITIVE_KEYS.map(
 	(k) => new RegExp(`("${k}"\\s*:\\s*")([^"]+)(")`, 'gi'),
@@ -36,10 +36,10 @@ function redactSecrets(s: string): string {
 	return out;
 }
 
-function payiLog(msg: string) {
-	if (!PAYI_FILE_DEBUG_ENABLED) return;
+function ascertaLog(msg: string) {
+	if (!ASCERTA_FILE_DEBUG_ENABLED) return;
 	const line = `[${new Date().toISOString()}] ${redactSecrets(msg)}\n`;
-	fs.appendFileSync(PAYI_DEBUG_LOG, line);
+	fs.appendFileSync(ASCERTA_DEBUG_LOG, line);
 }
 
 function deriveProviderBaseUri(workspaceUrl: string): string {
@@ -47,17 +47,17 @@ function deriveProviderBaseUri(workspaceUrl: string): string {
 	return `${url.protocol}//${url.host}/serving-endpoints`;
 }
 
-export class PayiChatModelDatabricks implements INodeType {
+export class AscertaChatModelDatabricks implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Pay-i Databricks (Proxy)',
-		name: 'lmChatPayiDatabricks',
-		icon: 'file:payi_logo.png',
+		displayName: 'Ascerta Databricks (Proxy)',
+		name: 'lmChatAscertaDatabricks',
+		icon: 'file:ascerta_logo.svg',
 		group: ['transform'],
 		version: [1],
 		description:
-			'Databricks Model Serving chat model routed through Pay-i proxy for cost tracking and budget enforcement',
+			'Databricks Model Serving chat model routed through Ascerta proxy for cost tracking and budget enforcement',
 		defaults: {
-			name: 'Pay-i Databricks (Proxy)',
+			name: 'Ascerta Databricks (Proxy)',
 		},
 		codex: {
 			categories: ['AI'],
@@ -71,17 +71,17 @@ export class PayiChatModelDatabricks implements INodeType {
 		outputNames: ['Model'],
 		credentials: [
 			{
-				name: 'payiApi',
+				name: 'ascertaApi',
 				required: true,
 			},
 			{
-				name: 'payiDatabricksApi',
+				name: 'ascertaDatabricksApi',
 				required: true,
 			},
 		],
 		properties: [
 			...chatModelDatabricksFields,
-			...createTrackingFields('databricks', 'endpointName', 'Pay-i Databricks (Proxy)'),
+			...createTrackingFields('databricks', 'endpointName', 'Ascerta Databricks (Proxy)'),
 			...versionNotice,
 		],
 	};
@@ -89,7 +89,7 @@ export class PayiChatModelDatabricks implements INodeType {
 	methods = {
 		listSearch: {
 			async getServingEndpoints(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
-				const credentials = await this.getCredentials('payiDatabricksApi');
+				const credentials = await this.getCredentials('ascertaDatabricksApi');
 				const host = (credentials.workspaceUrl as string).replace(/\/+$/, '');
 				const token = credentials.accessToken as string;
 
@@ -132,9 +132,9 @@ export class PayiChatModelDatabricks implements INodeType {
 			},
 
 			async getDeployedModels(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
-				const payiCredentials = await this.getCredentials('payiApi');
-				const payiBaseUrl = (payiCredentials.baseUrl as string).replace(/\/+$/, '');
-				const payiApiKey = payiCredentials.apiKey as string;
+				const ascertaCredentials = await this.getCredentials('ascertaApi');
+				const ascertaBaseUrl = (ascertaCredentials.baseUrl as string).replace(/\/+$/, '');
+				const ascertaApiKey = ascertaCredentials.apiKey as string;
 
 				const cloudProvider = this.getNodeParameter('cloudProvider', '') as string;
 				const category = `system.databricks.${cloudProvider}`;
@@ -143,16 +143,16 @@ export class PayiChatModelDatabricks implements INodeType {
 				try {
 					response = await this.helpers.httpRequest({
 						method: 'GET',
-						url: `${payiBaseUrl}/api/v1/categories/${encodeURIComponent(category)}/resources`,
+						url: `${ascertaBaseUrl}/api/v1/categories/${encodeURIComponent(category)}/resources`,
 						headers: {
-							'xProxy-api-key': payiApiKey,
+							'xProxy-api-key': ascertaApiKey,
 							Accept: 'application/json',
 						},
 						json: true,
 					});
 				} catch {
 					throw new Error(
-						'Could not retrieve deployed models from Pay-i. Please check your configured Pay-i credentials.',
+						'Could not retrieve deployed models from Ascerta. Please check your configured Ascerta credentials.',
 					);
 				}
 
@@ -178,16 +178,16 @@ export class PayiChatModelDatabricks implements INodeType {
 	};
 
 	async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
-		payiLog(`supplyData called for item ${itemIndex}`);
+		ascertaLog(`supplyData called for item ${itemIndex}`);
 
 		const { ChatOpenAI } = require('@langchain/openai');
 		const { N8nLlmTracing, makeN8nLlmFailedAttemptHandler } = require('@n8n/ai-utilities');
 
-		const payiCredentials = await this.getCredentials('payiApi');
-		const payiBaseUrl = (payiCredentials.baseUrl as string).replace(/\/+$/, '');
-		const payiApiKey = payiCredentials.apiKey as string;
+		const ascertaCredentials = await this.getCredentials('ascertaApi');
+		const ascertaBaseUrl = (ascertaCredentials.baseUrl as string).replace(/\/+$/, '');
+		const ascertaApiKey = ascertaCredentials.apiKey as string;
 
-		const databricksCredentials = await this.getCredentials('payiDatabricksApi');
+		const databricksCredentials = await this.getCredentials('ascertaDatabricksApi');
 		const accessToken = databricksCredentials.accessToken as string;
 		const workspaceUrl = (databricksCredentials.workspaceUrl as string).replace(/\/+$/, '');
 
@@ -209,11 +209,11 @@ export class PayiChatModelDatabricks implements INodeType {
 		const useCaseId = this.getNodeParameter('useCaseId', itemIndex, '') as string;
 		const advancedTracking = this.getNodeParameter('advancedTracking', itemIndex, {}) as Record<string, string>;
 		const useCaseVersion = advancedTracking.useCaseVersion || '';
-		// Canvas display name (e.g. "Pay-i DBX #4 - Summarizer") is more useful in
-		// Pay-i's dashboard than the generic node-type label. If the user hasn't
+		// Canvas display name (e.g. "Ascerta DBX #4 - Summarizer") is more useful in
+		// Ascerta's dashboard than the generic node-type label. If the user hasn't
 		// changed the parameter from its hard-coded default, swap in the canvas name.
 		let useCaseStep = this.getNodeParameter('useCaseStep', itemIndex, '') as string;
-		if (!useCaseStep || useCaseStep === 'Pay-i Databricks (Proxy)') {
+		if (!useCaseStep || useCaseStep === 'Ascerta Databricks (Proxy)') {
 			useCaseStep = this.getNode().name;
 		}
 		const useCaseProperties = advancedTracking.useCaseProperties || '';
@@ -237,7 +237,7 @@ export class PayiChatModelDatabricks implements INodeType {
 		const providerBaseUri = deriveProviderBaseUri(workspaceUrl);
 
 		const defaultHeaders: Record<string, string> = {
-			'xProxy-Api-Key': payiApiKey,
+			'xProxy-Api-Key': ascertaApiKey,
 			'xProxy-Provider-BaseUri': providerBaseUri,
 			'xProxy-PriceAs-Category': `system.databricks.${cloudProvider}`,
 			...trackingHeaders,
@@ -248,17 +248,17 @@ export class PayiChatModelDatabricks implements INodeType {
 
 		if (debugLogging) {
 			const mask = (v: string) => v.length <= 8 ? '****' : v.substring(0, 8) + '****';
-			this.logger.info(`[Pay-i Databricks] ──── DEBUG (item ${itemIndex}) ────`);
-			this.logger.info(`[Pay-i Databricks] workspaceUrl="${workspaceUrl}"`);
-			this.logger.info(`[Pay-i Databricks] → providerBaseUri="${providerBaseUri}"`);
-			this.logger.info(`[Pay-i Databricks] endpoint="${endpointName}" cloud="${cloudProvider}"`);
-			this.logger.info(`[Pay-i Databricks] baseURL="${payiBaseUrl}/api/v1/proxy/openai/v1"`);
+			this.logger.info(`[Ascerta Databricks] ──── DEBUG (item ${itemIndex}) ────`);
+			this.logger.info(`[Ascerta Databricks] workspaceUrl="${workspaceUrl}"`);
+			this.logger.info(`[Ascerta Databricks] → providerBaseUri="${providerBaseUri}"`);
+			this.logger.info(`[Ascerta Databricks] endpoint="${endpointName}" cloud="${cloudProvider}"`);
+			this.logger.info(`[Ascerta Databricks] baseURL="${ascertaBaseUrl}/api/v1/proxy/openai/v1"`);
 			const masked = Object.fromEntries(
 				Object.entries(defaultHeaders).map(([k, v]) =>
 					['xProxy-Api-Key', 'Authorization'].includes(k) ? [k, mask(v)] : [k, v],
 				),
 			);
-			this.logger.info(`[Pay-i Databricks] Headers: ${JSON.stringify(masked, null, 2)}`);
+			this.logger.info(`[Ascerta Databricks] Headers: ${JSON.stringify(masked, null, 2)}`);
 		}
 
 		const model = new ChatOpenAI({
@@ -266,15 +266,15 @@ export class PayiChatModelDatabricks implements INodeType {
 			model: endpointName,
 			...options,
 			configuration: {
-				baseURL: `${payiBaseUrl}/api/v1/proxy/openai/v1`,
+				baseURL: `${ascertaBaseUrl}/api/v1/proxy/openai/v1`,
 				defaultHeaders,
 			},
 			callbacks: [new N8nLlmTracing(this)],
 			onFailedAttempt: makeN8nLlmFailedAttemptHandler(this),
 		});
 
-		payiLog(`Model configured: baseURL=${payiBaseUrl}/api/v1/proxy/openai/v1, model=${endpointName}`);
-		payiLog(`Options: ${JSON.stringify(options)}`);
+		ascertaLog(`Model configured: baseURL=${ascertaBaseUrl}/api/v1/proxy/openai/v1, model=${endpointName}`);
+		ascertaLog(`Options: ${JSON.stringify(options)}`);
 
 		// Patch completionWithRetry to normalize structured content and optionally log.
 		// In @langchain/openai@1.x, ChatOpenAI delegates _generate() to either
@@ -285,8 +285,8 @@ export class PayiChatModelDatabricks implements INodeType {
 			if (!target || typeof target.completionWithRetry !== 'function') return;
 			const orig = target.completionWithRetry.bind(target);
 			target.completionWithRetry = async function(request: any, opts?: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-				payiLog(`──── RAW REQUEST TO OPENAI SDK (${label}) ────`);
-				payiLog(`Request params: ${JSON.stringify(request).substring(0, 5000)}`);
+				ascertaLog(`──── RAW REQUEST TO OPENAI SDK (${label}) ────`);
+				ascertaLog(`Request params: ${JSON.stringify(request).substring(0, 5000)}`);
 				try {
 					const result = await orig(request, opts);
 					// Flatten structured content blocks to a plain string.
@@ -303,20 +303,20 @@ export class PayiChatModelDatabricks implements INodeType {
 							}
 						}
 					}
-					payiLog(`──── RAW RESPONSE FROM OPENAI SDK (${label}) ────`);
-					payiLog(`Result: ${JSON.stringify(result).substring(0, 5000)}`);
+					ascertaLog(`──── RAW RESPONSE FROM OPENAI SDK (${label}) ────`);
+					ascertaLog(`Result: ${JSON.stringify(result).substring(0, 5000)}`);
 					if (logger) {
-						logger.info(`[Pay-i Databricks] Result: ${JSON.stringify(result).substring(0, 3000)}`);
+						logger.info(`[Ascerta Databricks] Result: ${JSON.stringify(result).substring(0, 3000)}`);
 					}
 					return result;
 				} catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-					payiLog(`──── ERROR FROM OPENAI SDK (${label}) ────`);
-					payiLog(`Error: ${err.message || err}`);
-					payiLog(`Status: ${err.status || err.statusCode || 'unknown'}`);
-					payiLog(`Full error: ${JSON.stringify(err, Object.getOwnPropertyNames(err)).substring(0, 5000)}`);
+					ascertaLog(`──── ERROR FROM OPENAI SDK (${label}) ────`);
+					ascertaLog(`Error: ${err.message || err}`);
+					ascertaLog(`Status: ${err.status || err.statusCode || 'unknown'}`);
+					ascertaLog(`Full error: ${JSON.stringify(err, Object.getOwnPropertyNames(err)).substring(0, 5000)}`);
 					if (logger) {
-						logger.info(`[Pay-i Databricks] Error: ${err.message || err}`);
-						logger.info(`[Pay-i Databricks] Status: ${err.status || err.statusCode || 'unknown'}`);
+						logger.info(`[Ascerta Databricks] Error: ${err.message || err}`);
+						logger.info(`[Ascerta Databricks] Status: ${err.status || err.statusCode || 'unknown'}`);
 					}
 					throw err;
 				}

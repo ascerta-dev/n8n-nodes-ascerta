@@ -1,14 +1,14 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 /**
- * Build the shared Pay-i tracking fields for a specific provider node.
+ * Build the shared Ascerta tracking fields for a specific provider node.
  *
  * @param _providerName  Short provider tag reserved for future per-provider customization
  *                       (e.g. "openai", "anthropic", "azure", "bedrock", "proxy").
  * @param _modelParam    Name of the node parameter that holds the model /
  *                       deployment identifier (e.g. "model" or "deploymentName"). Reserved.
  * @param nodeDisplayName  The display name of the calling node, used as the literal
- *                         default for `Use Case Step` (e.g. "Pay-i Databricks (Proxy)").
+ *                         default for `Use Case Step` (e.g. "Ascerta Databricks (Proxy)").
  */
 export function createTrackingFields(
 	_providerName: string,
@@ -38,7 +38,7 @@ export function createTrackingFields(
 			type: 'string',
 			default: `={{ $execution.id }}`,
 			description:
-				'Unique identifier for this use case instance. Defaults to the n8n execution ID — each workflow run gets its own Pay-i use case.',
+				'Unique identifier for this use case instance. Defaults to the n8n execution ID — each workflow run gets its own Ascerta use case.',
 		},
 		{
 			displayName: 'Use Case Step',
@@ -46,14 +46,14 @@ export function createTrackingFields(
 			type: 'string',
 			default: nodeDisplayName,
 			description:
-				'The step within the use case. Defaults to the node display name. Override with a custom label (e.g. "Step 1 - Outline") when you have multiple Pay-i nodes in one workflow.',
+				'The step within the use case. Defaults to the node display name. Override with a custom label (e.g. "Step 1 - Outline") when you have multiple Ascerta nodes in one workflow.',
 		},
 		{
 			displayName: 'Advanced Tracking',
 			name: 'advancedTracking',
 			placeholder: 'Add Option',
 			description:
-				'Additional tracking fields. These values should only be used or modified with guidance from Pay-i Support.',
+				'Additional tracking fields. These values should only be used or modified with guidance from Ascerta Support.',
 			type: 'collection',
 			default: {},
 			options: [
@@ -77,7 +77,7 @@ export function createTrackingFields(
 					name: 'limitIds',
 					type: 'string',
 					default: '',
-					description: 'Comma-separated list of Pay-i limit IDs to enforce',
+					description: 'Comma-separated list of Ascerta limit IDs to enforce',
 				},
 				{
 					displayName: 'Flatten Gemini Content',
@@ -93,7 +93,7 @@ export function createTrackingFields(
 					type: 'boolean',
 					default: false,
 					description:
-						'WARNING: Extremely verbose. Logs request URLs, headers, credential fields, and proxy routing details to the n8n server console. Should only be enabled with guidance from Pay-i Support.',
+						'WARNING: Extremely verbose. Logs request URLs, headers, credential fields, and proxy routing details to the n8n server console. Should only be enabled with guidance from Ascerta Support.',
 				},
 			],
 		},

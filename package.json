@@ -1,29 +1,32 @@
 {
-	"name": "n8n-nodes-payi",
+	"name": "@ascerta/n8n-nodes-ascerta",
 	"version": "1.0.5",
-	"description": "n8n community node for routing LLM requests through Pay-i proxy with cost tracking and budget enforcement",
+	"description": "n8n community node for routing LLM requests through Ascerta proxy with cost tracking and budget enforcement",
 	"keywords": [
 		"n8n-community-node-package",
 		"n8n",
-		"pay-i",
+		"ascerta",
 		"llm",
 		"ai",
 		"cost-tracking",
 		"proxy"
 	],
 	"license": "MIT",
-	"homepage": "https://github.com/pay-i/n8n-nodes-payi",
+	"homepage": "https://github.com/ascerta-dev/n8n-nodes-ascerta",
 	"author": {
-		"name": "Pay-i",
-		"email": "support@pay-i.com"
+		"name": "Ascerta",
+		"email": "support@ascerta.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Pay-i/n8n-nodes-payi"
+		"url": "https://github.com/ascerta-dev/n8n-nodes-ascerta"
 	},
-	"main": "index.js",
+	"main": "dist/nodes/Ascerta/Ascerta.node.js",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
-		"clean": "rm -rf dist",
+		"clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
 		"build": "npm run clean && tsc && node scripts/copy-icons.js",
 		"dev": "tsc --watch",
 		"format": "prettier nodes credentials --write",
@@ -39,16 +42,16 @@
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"credentials": [
-			"dist/credentials/PayiApi.credentials.js",
-			"dist/credentials/PayiDatabricksApi.credentials.js"
+			"dist/credentials/AscertaApi.credentials.js",
+			"dist/credentials/AscertaDatabricksApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/Payi/Payi.node.js",
-			"dist/nodes/Payi/PayiChatModel.node.js",
-			"dist/nodes/Payi/PayiChatModelAnthropic.node.js",
-			"dist/nodes/Payi/PayiChatModelAzure.node.js",
-			"dist/nodes/Payi/PayiChatModelBedrock.node.js",
-			"dist/nodes/Payi/PayiChatModelDatabricks.node.js"
+			"dist/nodes/Ascerta/Ascerta.node.js",
+			"dist/nodes/Ascerta/AscertaChatModel.node.js",
+			"dist/nodes/Ascerta/AscertaChatModelAnthropic.node.js",
+			"dist/nodes/Ascerta/AscertaChatModelAzure.node.js",
+			"dist/nodes/Ascerta/AscertaChatModelBedrock.node.js",
+			"dist/nodes/Ascerta/AscertaChatModelDatabricks.node.js"
 		]
 	},
 	"devDependencies": {

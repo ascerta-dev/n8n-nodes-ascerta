@@ -1,6 +1,7 @@
 name: Publish to npm
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
@@ -25,5 +26,5 @@ jobs:
       - run: npm ci --ignore-scripts
       # Trusted Publishing via OIDC — no token needed.
       # Requires id-token: write permission (set above) AND the workflow
-      # registered as a trusted publisher on npmjs.com.
+      # registered as a trusted publisher on npmjs.com with permission for npm publish.
       - run: npm publish --provenance --access public

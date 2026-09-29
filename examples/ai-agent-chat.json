@@ -1,5 +1,5 @@
 {
-  "name": "Pay-i AI Agent Chat",
+  "name": "Ascerta AI Agent Chat",
   "nodes": [
     {
       "parameters": {},
@@ -33,15 +33,15 @@
           "maxTokens": -1
         }
       },
-      "id": "payi-chat-1",
-      "name": "Pay-i Chat Model",
-      "type": "n8n-nodes-payi.lmChatPayi",
+      "id": "ascerta-chat-1",
+      "name": "Ascerta Chat Model",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
       "typeVersion": 1,
       "position": [220, 520],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     }
@@ -58,7 +58,7 @@
         ]
       ]
     },
-    "Pay-i Chat Model": {
+    "Ascerta Chat Model": {
       "ai_languageModel": [
         [
           {

@@ -69,27 +69,27 @@ function redactBody(body: object): string {
 	return JSON.stringify(summary, null, 2);
 }
 
-export class Payi implements INodeType {
+export class Ascerta implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Pay-i Proxy',
-		name: 'payi',
-		icon: 'file:payi_logo.png',
+		displayName: 'Ascerta Proxy',
+		name: 'ascerta',
+		icon: 'file:ascerta_logo.svg',
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["provider"]}} — {{$parameter["model"]}}',
-		description: 'Send LLM requests through Pay-i proxy for cost tracking and budget enforcement',
+		description: 'Send LLM requests through Ascerta proxy for cost tracking and budget enforcement',
 		defaults: {
-			name: 'Pay-i Proxy',
+			name: 'Ascerta Proxy',
 		},
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'payiApi',
+				name: 'ascertaApi',
 				required: true,
 			},
 			{
-				name: 'payiDatabricksApi',
+				name: 'ascertaDatabricksApi',
 				required: true,
 				displayOptions: { show: { provider: ['databricks'] } },
 			},
@@ -112,7 +112,7 @@ export class Payi implements INodeType {
 				description:
 					'When set, this JSON body is sent directly to the API, bypassing all structured fields above',
 			},
-			...createTrackingFields('proxy', 'model', 'Pay-i Proxy'),
+			...createTrackingFields('proxy', 'model', 'Ascerta Proxy'),
 			...outputFields,
 			...versionNotice,
 		],
@@ -122,12 +122,12 @@ export class Payi implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
-		const credentials = await this.getCredentials('payiApi');
+		const credentials = await this.getCredentials('ascertaApi');
 		const baseUrl = (credentials.baseUrl as string).replace(/\/+$/, '');
 
 		// Validate baseUrl — enforce HTTPS to prevent SSRF
 		if (!baseUrl.startsWith('https://')) {
-			throw new NodeOperationError(this.getNode(), 'Pay-i Base URL must start with https://');
+			throw new NodeOperationError(this.getNode(), 'Ascerta Base URL must start with https://');
 		}
 
 		for (let i = 0; i < items.length; i++) {
@@ -193,38 +193,38 @@ export class Payi implements INodeType {
 				};
 
 				if (debugLogging) {
-					this.logger.info(`[Pay-i] ──── REQUEST (item ${i}) ────`);
-					this.logger.info(`[Pay-i] ${requestOptions.method} ${url}`);
-					this.logger.info(`[Pay-i] Headers: ${JSON.stringify(maskHeaders(headers), null, 2)}`);
-					this.logger.info(`[Pay-i] Body shape: ${redactBody(providerRequest.body as object)}`);
+					this.logger.info(`[Ascerta] ──── REQUEST (item ${i}) ────`);
+					this.logger.info(`[Ascerta] ${requestOptions.method} ${url}`);
+					this.logger.info(`[Ascerta] Headers: ${JSON.stringify(maskHeaders(headers), null, 2)}`);
+					this.logger.info(`[Ascerta] Body shape: ${redactBody(providerRequest.body as object)}`);
 				}
 
 				let response: unknown;
 				try {
 					response = await this.helpers.httpRequestWithAuthentication.call(
 						this,
-						'payiApi',
+						'ascertaApi',
 						requestOptions,
 					);
 				} catch (reqError) {
 					if (debugLogging) {
 						const errMsg = reqError instanceof Error ? reqError.message : String(reqError);
-						this.logger.error(`[Pay-i] ──── ERROR (item ${i}) ────`);
-						this.logger.error(`[Pay-i] ${errMsg}`);
+						this.logger.error(`[Ascerta] ──── ERROR (item ${i}) ────`);
+						this.logger.error(`[Ascerta] ${errMsg}`);
 					}
 					throw reqError;
 				}
 
 				if (debugLogging) {
-					this.logger.info(`[Pay-i] ──── RESPONSE (item ${i}) ────`);
+					this.logger.info(`[Ascerta] ──── RESPONSE (item ${i}) ────`);
 					const preview = JSON.stringify(response);
-					this.logger.info(`[Pay-i] ${preview.length > 2000 ? preview.substring(0, 2000) + '...(truncated)' : preview}`);
+					this.logger.info(`[Ascerta] ${preview.length > 2000 ? preview.substring(0, 2000) + '...(truncated)' : preview}`);
 				}
 
 				const outputData = response as IDataObject;
 
 				if (includeCostData && outputData.xproxy_result !== undefined) {
-					outputData.payiCost = outputData.xproxy_result;
+					outputData.ascertaCost = outputData.xproxy_result;
 					delete outputData.xproxy_result;
 				} else {
 					delete outputData.xproxy_result;

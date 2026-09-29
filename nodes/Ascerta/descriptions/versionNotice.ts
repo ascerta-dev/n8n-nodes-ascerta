@@ -7,7 +7,7 @@ const PACKAGE_VERSION = '1.0.5';
 // room to expand to multi-line later without changing every node file.
 export const versionNotice: INodeProperties[] = [
 	{
-		displayName: `Current Pay-i Node Version: ${PACKAGE_VERSION}`,
+		displayName: `Current Ascerta Node Version: ${PACKAGE_VERSION}`,
 		name: 'versionNotice',
 		type: 'notice',
 		default: '',

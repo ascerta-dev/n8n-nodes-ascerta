@@ -1,5 +1,5 @@
 {
-  "name": "Pay-i Summarize & Translate Chain",
+  "name": "Ascerta Summarize & Translate Chain",
   "nodes": [
     {
       "parameters": {},
@@ -59,15 +59,15 @@
         "returnFullResponse": false,
         "debugLogging": true
       },
-      "id": "payi-summarize",
+      "id": "ascerta-summarize",
       "name": "Step 1: Summarize",
-      "type": "n8n-nodes-payi.payi",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [480, 300],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -84,7 +84,7 @@
             {
               "id": "summaryCost",
               "name": "summaryCost",
-              "value": "={{ $json.payiCost?.cost?.total?.base || 0 }}",
+              "value": "={{ $json.ascertaCost?.cost?.total?.base || 0 }}",
               "type": "number"
             }
           ]
@@ -118,21 +118,21 @@
         "returnFullResponse": false,
         "debugLogging": true
       },
-      "id": "payi-translate",
+      "id": "ascerta-translate",
       "name": "Step 2: Translate",
-      "type": "n8n-nodes-payi.payi",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [920, 300],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const translateResponse = $input.first().json;\nconst summary = $('Extract Summary').first().json.summary;\nconst summaryCost = $('Extract Summary').first().json.summaryCost;\nconst translation = translateResponse.choices?.[0]?.message?.content || 'Translation failed';\nconst translateCost = translateResponse.payiCost?.cost?.total?.base || 0;\n\nreturn [{\n  json: {\n    pipeline: 'summarize-translate',\n    steps: {\n      summarize: {\n        output: summary,\n        cost_usd: summaryCost\n      },\n      translate: {\n        language: $('Input Text').first().json.targetLanguage,\n        output: translation,\n        cost_usd: translateCost\n      }\n    },\n    total_cost_usd: summaryCost + translateCost\n  }\n}];"
+        "jsCode": "const translateResponse = $input.first().json;\nconst summary = $('Extract Summary').first().json.summary;\nconst summaryCost = $('Extract Summary').first().json.summaryCost;\nconst translation = translateResponse.choices?.[0]?.message?.content || 'Translation failed';\nconst translateCost = translateResponse.ascertaCost?.cost?.total?.base || 0;\n\nreturn [{\n  json: {\n    pipeline: 'summarize-translate',\n    steps: {\n      summarize: {\n        output: summary,\n        cost_usd: summaryCost\n      },\n      translate: {\n        language: $('Input Text').first().json.targetLanguage,\n        output: translation,\n        cost_usd: translateCost\n      }\n    },\n    total_cost_usd: summaryCost + translateCost\n  }\n}];"
       },
       "id": "code-1",
       "name": "Pipeline Summary",

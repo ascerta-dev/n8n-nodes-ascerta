@@ -1,14 +1,14 @@
-# Pay-i OpenAI (Proxy)
+# Ascerta OpenAI (Proxy)
 
-Routes OpenAI chat model requests through the Pay-i proxy for cost tracking, budget enforcement, and usage analytics.
+Routes OpenAI chat model requests through the Ascerta proxy for cost tracking, budget enforcement, and usage analytics.
 
 ## Node Details
 
 | Property | Value |
 |----------|-------|
-| Display Name | Pay-i OpenAI (Proxy) |
-| Node Name | `lmChatPayi` |
-| n8n Type | `n8n-nodes-payi.lmChatPayi` |
+| Display Name | Ascerta OpenAI (Proxy) |
+| Node Name | `lmChatAscerta` |
+| n8n Type | `@ascerta/n8n-nodes-ascerta.lmChatAscerta` |
 | LangChain Class | `ChatOpenAI` (`@langchain/openai`) |
 | Proxy Path | `/api/v1/proxy/openai/v1` |
 
@@ -16,7 +16,7 @@ Routes OpenAI chat model requests through the Pay-i proxy for cost tracking, bud
 
 | Credential | Type | Source |
 |------------|------|--------|
-| Pay-i API | `payiApi` | Pay-i community node |
+| Ascerta API | `ascertaApi` | Ascerta community node |
 | OpenAI API | `openAiApi` | Built-in n8n credential |
 
 The OpenAI credential provides the API key (`apiKey`) used as the `Authorization: Bearer` header forwarded to OpenAI.
@@ -42,20 +42,20 @@ The OpenAI credential provides the API key (`apiKey`) used as the `Authorization
 
 ```
 n8n Workflow
-  └─ Pay-i OpenAI (Proxy)
-       ├─ Credentials: Pay-i API key + OpenAI API key
-       └─ POST {payiBaseUrl}/api/v1/proxy/openai/v1/chat/completions
+  └─ Ascerta OpenAI (Proxy)
+       ├─ Credentials: Ascerta API key + OpenAI API key
+       └─ POST {ascertaBaseUrl}/api/v1/proxy/openai/v1/chat/completions
             Headers:
-              xProxy-Api-Key:        {payi_key}
+              xProxy-Api-Key:        {ascerta_key}
               xProxy-User-ID:        {userId}          (if set)
               xProxy-UseCase-Name:   {useCaseName}     (if set)
               xProxy-UseCase-ID:     {useCaseId}       (if set)
               Authorization:         Bearer {openai_key}
 ```
 
-The node instantiates `ChatOpenAI` from `@langchain/openai` with `configuration.baseURL` pointed at `{payiBaseUrl}/api/v1/proxy/openai/v1` and `configuration.defaultHeaders` carrying the Pay-i proxy key and any tracking headers. The `Authorization: Bearer {openai_key}` header is set by LangChain from the `apiKey` field — Pay-i passes it through untouched to OpenAI.
+The node instantiates `ChatOpenAI` from `@langchain/openai` with `configuration.baseURL` pointed at `{ascertaBaseUrl}/api/v1/proxy/openai/v1` and `configuration.defaultHeaders` carrying the Ascerta proxy key and any tracking headers. The `Authorization: Bearer {openai_key}` header is set by LangChain from the `apiKey` field — Ascerta passes it through untouched to OpenAI.
 
-OpenAI is the simplest routing path in the Pay-i node family. There is no endpoint URL derivation (compare Databricks, which transforms a workspace URL into an AI Gateway URL), and no special auth exchange. The proxy path is a fixed constant; the model ID is passed directly in the request body.
+OpenAI is the simplest routing path in the Ascerta node family. There is no endpoint URL derivation (compare Databricks, which transforms a workspace URL into an AI Gateway URL), and no special auth exchange. The proxy path is a fixed constant; the model ID is passed directly in the request body.
 
 ### Tracking Headers
 
@@ -63,13 +63,13 @@ The following headers are included in every request when their corresponding nod
 
 | Header | Node Field | Default Value |
 |--------|------------|---------------|
-| `xProxy-Api-Key` | _(Pay-i credential)_ | Required — always sent |
+| `xProxy-Api-Key` | _(Ascerta credential)_ | Required — always sent |
 | `xProxy-User-ID` | User ID | _(empty, omitted)_ |
 | `xProxy-UseCase-Name` | Use Case Name | `$workflow.name` (spaces → hyphens) |
 | `xProxy-UseCase-ID` | Use Case ID | `{nodeId}` (UUID, stable per canvas node) |
-| `xProxy-UseCase-Step` | Use Case Step | Node display name (e.g. `Pay-i OpenAI (Proxy)`); override with a custom step label as needed |
+| `xProxy-UseCase-Step` | Use Case Step | Node display name (e.g. `Ascerta OpenAI (Proxy)`); override with a custom step label as needed |
 
-Advanced tracking headers (`xProxy-UseCase-Version`, `xProxy-UseCase-Properties`, `xProxy-Limit-IDs`) are available under the **Advanced Tracking** collection and should only be modified with guidance from Pay-i Support.
+Advanced tracking headers (`xProxy-UseCase-Version`, `xProxy-UseCase-Properties`, `xProxy-Limit-IDs`) are available under the **Advanced Tracking** collection and should only be modified with guidance from Ascerta Support.
 
 ## Model IDs
 
@@ -84,19 +84,19 @@ The node does not validate or enumerate model IDs — any string entered in the 
 
 ## Known Limitations
 
-- **Organization ID** — OpenAI supports an `OpenAI-Organization` header for routing requests to a specific org. This header is not currently passed through by the Pay-i node. If your account requires it, open a support request with Pay-i.
+- **Organization ID** — OpenAI supports an `OpenAI-Organization` header for routing requests to a specific org. This header is not currently passed through by the Ascerta node. If your account requires it, open a support request with Ascerta.
 
 ## OpenAI Pricing
 
 OpenAI charges per token, billed separately for input (prompt) and output (completion). Rates vary by model and are updated periodically on the [OpenAI pricing page](https://openai.com/api/pricing/).
 
-Pay-i tracks both input and output token counts on every request and converts them to actual dollar cost using the current rate table for the model. The Pay-i dashboard shows per-request cost, per-user cost, and aggregate spend broken down by model and Use Case.
+Ascerta tracks both input and output token counts on every request and converts them to actual dollar cost using the current rate table for the model. The Ascerta dashboard shows per-request cost, per-user cost, and aggregate spend broken down by model and Use Case.
 
 Unlike DBU-based pricing (see [Databricks](databricks.md)), OpenAI pricing is a direct per-token dollar rate with no intermediate unit conversion.
 
 ## Migration
 
-The n8n migration toolkit automatically detects the following native nodes and replaces them with this Pay-i node:
+The n8n migration toolkit automatically detects the following native nodes and replaces them with this Ascerta node:
 
 - `@n8n/n8n-nodes-langchain.lmChatOpenAi`
 - `lmChatOpenRouter`

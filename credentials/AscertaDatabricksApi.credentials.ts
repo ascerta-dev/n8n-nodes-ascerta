@@ -6,12 +6,12 @@ import {
 	Icon,
 } from 'n8n-workflow';
 
-export class PayiDatabricksApi implements ICredentialType {
-	name = 'payiDatabricksApi';
+export class AscertaDatabricksApi implements ICredentialType {
+	name = 'ascertaDatabricksApi';
 
-	displayName = 'Pay-i Databricks API';
+	displayName = 'Ascerta Databricks API';
 
-	icon: Icon = 'file:payi_logo.png';
+	icon: Icon = 'file:ascerta_logo.svg';
 
 	documentationUrl = 'https://docs.databricks.com/en/dev-tools/auth/pat.html';
 

@@ -7,7 +7,7 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
 
-import { chatModelAzureFields } from './descriptions/chatModelAzureFields';
+import { chatModelFields } from './descriptions/chatModelFields';
 import { createTrackingFields } from './descriptions/trackingFields';
 import { versionNotice } from './descriptions/versionNotice';
 import { sanitizeHeaderValue } from './utils/headers';
@@ -16,17 +16,16 @@ import { sanitizeHeaderValue } from './utils/headers';
 // Declared here so TypeScript accepts the require() calls.
 declare function require(module: string): any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-export class PayiChatModelAzure implements INodeType {
+export class AscertaChatModel implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Pay-i Azure AI Foundry (Proxy)',
-		name: 'lmChatPayiAzure',
-		icon: 'file:payi_logo.png',
+		displayName: 'Ascerta OpenAI (Proxy)',
+		name: 'lmChatAscerta',
+		icon: 'file:ascerta_logo.svg',
 		group: ['transform'],
 		version: [1],
-		description:
-			'Azure AI Foundry chat model routed through Pay-i proxy for cost tracking and budget enforcement',
+		description: 'OpenAI chat model routed through Ascerta proxy for cost tracking and budget enforcement',
 		defaults: {
-			name: 'Pay-i Azure AI Foundry (Proxy)',
+			name: 'Ascerta OpenAI (Proxy)',
 		},
 		codex: {
 			categories: ['AI'],
@@ -40,50 +39,33 @@ export class PayiChatModelAzure implements INodeType {
 		outputNames: ['Model'],
 		credentials: [
 			{
-				name: 'payiApi',
+				name: 'ascertaApi',
 				required: true,
 			},
 			{
-				name: 'azureOpenAiApi',
+				name: 'openAiApi',
 				required: true,
 			},
 		],
 		properties: [
-			...chatModelAzureFields,
-			...createTrackingFields('azure', 'deploymentName', 'Pay-i Azure AI Foundry (Proxy)'),
+			...chatModelFields,
+			...createTrackingFields('openai', 'model', 'Ascerta OpenAI (Proxy)'),
 			...versionNotice,
 		],
 	};
 
 	async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
 		// Runtime imports — resolved through n8n's VM context, not bundled
-		// We use ChatOpenAI (not AzureChatOpenAI) because:
-		//   1. Azure OpenAI's wire format is identical to OpenAI (same JSON schema)
-		//   2. ChatOpenAI lets us set baseURL/headers directly via configuration
-		//   3. AzureChatOpenAI's internal auth handling (double header injection,
-		//      request-time overrides) conflicts with Pay-i's proxy auth flow
 		const { ChatOpenAI } = require('@langchain/openai');
 		const { N8nLlmTracing, makeN8nLlmFailedAttemptHandler } = require('@n8n/ai-utilities');
 
-		const payiCredentials = await this.getCredentials('payiApi');
-		const payiBaseUrl = (payiCredentials.baseUrl as string).replace(/\/+$/, '');
-		const payiApiKey = payiCredentials.apiKey as string;
+		const ascertaCredentials = await this.getCredentials('ascertaApi');
+		const ascertaBaseUrl = (ascertaCredentials.baseUrl as string).replace(/\/+$/, '');
+		const ascertaApiKey = ascertaCredentials.apiKey as string;
 
-		const providerCredentials = await this.getCredentials('azureOpenAiApi');
+		const providerCredentials = await this.getCredentials('openAiApi');
 		const providerApiKey = providerCredentials.apiKey as string;
-		// Build the upstream Azure endpoint URL for Pay-i proxy routing.
-		// The credential may have an explicit endpoint, otherwise construct from resourceName.
-		const azureResourceName = providerCredentials.resourceName as string;
-		const azureEndpointRaw = (providerCredentials.endpoint as string) || '';
-		const azureEndpoint = azureEndpointRaw
-			? azureEndpointRaw.replace(/\/+$/, '')
-			: `https://${azureResourceName}.openai.azure.com`;
-
-		const deploymentName = this.getNodeParameter('deploymentName', itemIndex) as string;
-		const nodeApiVersion = this.getNodeParameter('apiVersion', itemIndex, '') as string;
-		// Prefer the node parameter if explicitly set; fall back to the credential's apiVersion
-		const credApiVersion = (providerCredentials.apiVersion as string) || '';
-		const apiVersion = nodeApiVersion || credApiVersion || '2024-08-01-preview';
+		const modelName = this.getNodeParameter('model', itemIndex) as string;
 		const options = this.getNodeParameter('options', itemIndex, {}) as Record<string, unknown>;
 
 		// Build tracking headers
@@ -94,11 +76,11 @@ export class PayiChatModelAzure implements INodeType {
 		// Advanced tracking fields (collapsed in UI under "Advanced Tracking")
 		const advancedTracking = this.getNodeParameter('advancedTracking', itemIndex, {}) as Record<string, string>;
 		const useCaseVersion = advancedTracking.useCaseVersion || '';
-		// Canvas display name (e.g. "Pay-i Azure #4 - Summarizer") is more useful in
-		// Pay-i's dashboard than the generic node-type label. If the user hasn't
+		// Canvas display name (e.g. "Ascerta OpenAI #4 - Summarizer") is more useful in
+		// Ascerta's dashboard than the generic node-type label. If the user hasn't
 		// changed the parameter from its hard-coded default, swap in the canvas name.
 		let useCaseStep = this.getNodeParameter('useCaseStep', itemIndex, '') as string;
-		if (!useCaseStep || useCaseStep === 'Pay-i Azure AI Foundry (Proxy)') {
+		if (!useCaseStep || useCaseStep === 'Ascerta OpenAI (Proxy)') {
 			useCaseStep = this.getNode().name;
 		}
 		const useCaseProperties = advancedTracking.useCaseProperties || '';
@@ -116,49 +98,34 @@ export class PayiChatModelAzure implements INodeType {
 		if (limitIds) trackingHeaders['xProxy-Limit-IDs'] = sanitizeHeaderValue(limitIds);
 
 		const timeout = options.timeout as number | undefined;
-
-		// Construct the Azure-style URL through Pay-i's proxy.
-		// Azure OpenAI uses: {endpoint}/openai/deployments/{name}/chat/completions?api-version={v}
-		// Pay-i proxy prefix: {payiBaseUrl}/api/v1/proxy/azure.openai
-		// ChatOpenAI appends /chat/completions to baseURL, so we set baseURL up to the deployment:
-		const baseURL = `${payiBaseUrl}/api/v1/proxy/azure.openai/openai/deployments/${deploymentName}`;
-
+		const baseURL = `${ascertaBaseUrl}/api/v1/proxy/openai/v1`;
 		const defaultHeaders: Record<string, string> = {
-			'xProxy-Api-Key': payiApiKey,
-			'xProxy-Provider-BaseUri': azureEndpoint,
-			'xProxy-PriceAs-Resource': deploymentName,
-			'api-key': providerApiKey,
+			'xProxy-Api-Key': ascertaApiKey,
+			'xProxy-PriceAs-Resource': modelName,
 			...trackingHeaders,
 		};
 
 		if (debugLogging) {
 			const mask = (v: string) => v.length <= 8 ? '****' : v.substring(0, 8) + '****';
-			this.logger.info(`[Pay-i Azure] ──── DEBUG (item ${itemIndex}) ────`);
-			this.logger.info(`[Pay-i Azure] Credential keys: ${Object.keys(providerCredentials).join(', ')}`);
-			this.logger.info(`[Pay-i Azure] resourceName="${azureResourceName}" endpointRaw="${azureEndpointRaw}"`);
-			this.logger.info(`[Pay-i Azure] → azureEndpoint="${azureEndpoint}"`);
-			this.logger.info(`[Pay-i Azure] deployment="${deploymentName}" apiVersion="${apiVersion}"`);
-			this.logger.info(`[Pay-i Azure] baseURL="${baseURL}"`);
+			this.logger.info(`[Ascerta OpenAI] ──── DEBUG (item ${itemIndex}) ────`);
+			this.logger.info(`[Ascerta OpenAI] model="${modelName}" baseURL="${baseURL}"`);
 			const masked = Object.fromEntries(
 				Object.entries(defaultHeaders).map(([k, v]) =>
-					['xProxy-Api-Key', 'api-key'].includes(k) ? [k, mask(v)] : [k, v],
+					k === 'xProxy-Api-Key' ? [k, mask(v)] : [k, v],
 				),
 			);
-			this.logger.info(`[Pay-i Azure] Headers: ${JSON.stringify(masked, null, 2)}`);
+			this.logger.info(`[Ascerta OpenAI] Headers: ${JSON.stringify(masked, null, 2)}`);
 		}
 
 		const model = new ChatOpenAI({
 			apiKey: providerApiKey,
-			model: deploymentName,
+			model: modelName,
 			...options,
 			timeout,
 			maxRetries: (options.maxRetries as number) ?? 2,
 			configuration: {
 				baseURL,
 				defaultHeaders,
-				defaultQuery: {
-					'api-version': apiVersion,
-				},
 			},
 			callbacks: [new N8nLlmTracing(this)],
 			onFailedAttempt: makeN8nLlmFailedAttemptHandler(this),

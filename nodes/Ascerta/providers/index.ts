@@ -73,7 +73,7 @@ export async function buildProviderRequest(
 		}
 
 		case 'databricks': {
-			const databricksCredentials = await context.getCredentials('payiDatabricksApi');
+			const databricksCredentials = await context.getCredentials('ascertaDatabricksApi');
 			const accessToken = databricksCredentials.accessToken as string;
 			const workspaceUrl = (databricksCredentials.workspaceUrl as string).replace(/\/+$/, '');
 			const endpointName = context.getNodeParameter('databricksEndpointName', itemIndex) as string;

@@ -25,17 +25,17 @@ This package has zero runtime dependencies. All dependencies are dev-only (build
 
 | Service | Provider | Purpose |
 |---------|----------|---------|
-| Pay-i API | Pay-i | Proxy endpoint for cost tracking and budget enforcement |
-| OpenAI API | OpenAI | LLM provider (via Pay-i proxy) |
-| Anthropic API | Anthropic | LLM provider (via Pay-i proxy) |
-| Azure OpenAI | Microsoft | LLM provider (via Pay-i proxy) |
-| AWS Bedrock | Amazon | LLM provider (via Pay-i proxy) |
-| Databricks | Databricks | LLM provider (via Pay-i proxy) |
+| Ascerta API | Ascerta | Proxy endpoint for cost tracking and budget enforcement |
+| OpenAI API | OpenAI | LLM provider (via Ascerta proxy) |
+| Anthropic API | Anthropic | LLM provider (via Ascerta proxy) |
+| Azure OpenAI | Microsoft | LLM provider (via Ascerta proxy) |
+| AWS Bedrock | Amazon | LLM provider (via Ascerta proxy) |
+| Databricks | Databricks | LLM provider (via Ascerta proxy) |
 
 ## Companion Toolkit
 
 | Package | Repository | Purpose |
 |---------|-----------|---------|
-| payi-n8n-toolkit | [Pay-i/utilities](https://github.com/Pay-i/utilities) | Migration and audit scripts for n8n workflows |
+| ascerta-n8n-toolkit | [ascerta-dev/utilities](https://github.com/ascerta-dev/utilities) | Migration and audit scripts for n8n workflows |
 
 Last updated: 2026-06-05

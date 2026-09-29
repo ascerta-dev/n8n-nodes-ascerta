@@ -6,14 +6,14 @@ import {
 	Icon,
 } from 'n8n-workflow';
 
-export class PayiApi implements ICredentialType {
-	name = 'payiApi';
+export class AscertaApi implements ICredentialType {
+	name = 'ascertaApi';
 
-	displayName = 'Pay-i API';
+	displayName = 'Ascerta API';
 
-	icon: Icon = 'file:payi_logo.png';
+	icon: Icon = 'file:ascerta_logo.svg';
 
-	documentationUrl = 'https://docs.pay-i.com';
+	documentationUrl = 'https://docs.ascerta.com';
 
 	properties: INodeProperties[] = [
 		{
@@ -30,8 +30,8 @@ export class PayiApi implements ICredentialType {
 			type: 'string',
 			default: '',
 			required: true,
-			placeholder: 'e.g. https://api.yourcompany.pay-i.com',
-			description: 'The base URL of your Pay-i instance',
+			placeholder: 'e.g. https://api.yourcompany.ascerta.com',
+			description: 'The base URL of your Ascerta instance',
 		},
 	];
 

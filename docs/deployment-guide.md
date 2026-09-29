@@ -1,6 +1,6 @@
-# Deployment & Configuration Guide — n8n-nodes-payi
+# Deployment & Configuration Guide — @ascerta/n8n-nodes-ascerta
 
-**Audience:** ITOps engineers and workflow builders deploying Pay-i community nodes on a self-hosted n8n instance.
+**Audience:** ITOps engineers and workflow builders deploying Ascerta community nodes on a self-hosted n8n instance.
 
 **Scope:** This guide covers everything from initial prerequisites through a working, verified node installation with cost-tracking attribution configured. Read it end to end before you start; a missed step early usually surfaces as a confusing error later.
 
@@ -22,17 +22,17 @@
 
 Before installing the node, confirm you have everything in the list below. Missing any one of these will block you at a specific step — it's faster to check now.
 
-### Pay-i Account & Instance
+### Ascerta Account & Instance
 
 | Requirement | Notes |
 |-------------|-------|
-| Pay-i account | Provisioned by the Pay-i team. Contact [Pay-i support](https://www.pay-i.com/support) if your account has not been set up yet. |
-| Pay-i Base URL | Your dedicated instance URL — for example, `https://api.yourcompany.pay-i.com`. **This is NOT `api.pay-i.com`.** Every customer gets a dedicated endpoint; using the wrong URL is the single most common setup mistake and produces misleading errors. |
-| Pay-i API key | Available from your Pay-i dashboard after account provisioning. |
+| Ascerta account | Provisioned by the Ascerta team. Contact [Ascerta support](https://www.ascerta.com/support) if your account has not been set up yet. |
+| Ascerta Base URL | Your dedicated instance URL — for example, `https://api.yourcompany.ascerta.com`. **This is NOT `api.ascerta.com`.** Every customer gets a dedicated endpoint; using the wrong URL is the single most common setup mistake and produces misleading errors. |
+| Ascerta API key | Available from your Ascerta dashboard after account provisioning. |
 
 ### Provider Credentials
 
-You need credentials for each LLM provider you intend to route through Pay-i. Collect these before you begin — you will enter them during [Section 4: Credential Setup](#4-credential-setup).
+You need credentials for each LLM provider you intend to route through Ascerta. Collect these before you begin — you will enter them during [Section 4: Credential Setup](#4-credential-setup).
 
 | Provider | What You Need |
 |----------|---------------|
@@ -46,7 +46,7 @@ You need credentials for each LLM provider you intend to route through Pay-i. Co
 
 - Self-hosted n8n, latest stable release recommended.
 - Community node installation must be enabled (see [Section 3](#3-environment-configuration)).
-- Network access from the n8n host to your Pay-i Base URL on port 443.
+- Network access from the n8n host to your Ascerta Base URL on port 443.
 
 ---
 
@@ -60,12 +60,12 @@ This is the simplest path for instances managed through the n8n web interface.
 
 1. Open n8n and go to **Settings > Community Nodes**.
 2. Click **Install**.
-3. Enter the package name: `n8n-nodes-payi`
+3. Enter the package name: `@ascerta/n8n-nodes-ascerta`
 4. Accept the community node security prompt.
 5. Click **Install** to confirm.
 6. **Restart n8n.** The node is not available until the process restarts.
 
-After restart, search for "Pay-i" in the node panel to confirm the nodes appear.
+After restart, search for "Ascerta" in the node panel to confirm the nodes appear.
 
 ### Option B: Docker Image
 
@@ -76,7 +76,7 @@ For teams managing n8n via Docker, bake the package into your image so every con
 ```dockerfile
 FROM n8nio/n8n:latest
 USER root
-RUN cd /usr/local/lib/node_modules/n8n && npm install n8n-nodes-payi
+RUN cd /usr/local/lib/node_modules/n8n && npm install @ascerta/n8n-nodes-ascerta
 USER node
 RUN rm -rf /home/node/.n8n/.cache
 ```
@@ -90,7 +90,7 @@ Build and tag this image, then reference it in your compose file.
 ```yaml
 services:
   n8n:
-    image: your-registry/n8n-payi:latest   # Use your tagged image above
+    image: your-registry/n8n-ascerta:latest   # Use your tagged image above
     environment:
       - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
     ports:
@@ -99,7 +99,7 @@ services:
       - n8n_data:/home/node/.n8n
 ```
 
-The `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` variable is required for Pay-i nodes to function as AI Agent tools. See [Section 3](#3-environment-configuration) for details.
+The `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` variable is required for Ascerta nodes to function as AI Agent tools. See [Section 3](#3-environment-configuration) for details.
 
 ---
 
@@ -109,7 +109,7 @@ The `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` variable is required for Pay-i nod
 
 | Variable | Value | Purpose |
 |----------|-------|---------|
-| `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` | `true` | Allows community nodes (including Pay-i) to be used as tools inside the n8n AI Agent node. Without this, the node installs but cannot be attached to an AI Agent. |
+| `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` | `true` | Allows community nodes (including Ascerta) to be used as tools inside the n8n AI Agent node. Without this, the node installs but cannot be attached to an AI Agent. |
 
 ### How to Set It
 
@@ -150,18 +150,18 @@ before running `n8n start`.
 
 ## 4. Credential Setup
 
-Pay-i nodes require two credentials per workflow: one for Pay-i itself, and one for the upstream provider. Set up Pay-i first, then configure provider credentials.
+Ascerta nodes require two credentials per workflow: one for Ascerta itself, and one for the upstream provider. Set up Ascerta first, then configure provider credentials.
 
-### 4.1 Pay-i API Credential
+### 4.1 Ascerta API Credential
 
-**Credential type:** `Pay-i API` (provided by this community node)
+**Credential type:** `Ascerta API` (provided by this community node)
 
-Navigate to **Settings > Credentials > New Credential > Pay-i API**.
+Navigate to **Settings > Credentials > New Credential > Ascerta API**.
 
 | Field | Value | Notes |
 |-------|-------|-------|
-| API Key | Your Pay-i API key | From the Pay-i dashboard |
-| Base URL | `https://api.yourcompany.pay-i.com` | **Your dedicated instance URL.** Do not leave this as a default or placeholder. Do not use `api.pay-i.com`. If you are unsure of your Base URL, contact [Pay-i support](https://www.pay-i.com/support). |
+| API Key | Your Ascerta API key | From the Ascerta dashboard |
+| Base URL | `https://api.yourcompany.ascerta.com` | **Your dedicated instance URL.** Do not leave this as a default or placeholder. Do not use `api.ascerta.com`. If you are unsure of your Base URL, contact [Ascerta support](https://www.ascerta.com/support). |
 
 > **Common mistake:** Leaving the Base URL as a default or using the wrong endpoint. If requests fail with 401 or connection errors and your API key is correct, the Base URL is almost always the cause. Double-check it before debugging anything else.
 
@@ -201,7 +201,7 @@ If you already have an Anthropic credential in n8n, reuse it.
 | API Key | Your Azure OpenAI API key | From Azure portal > your resource > Keys and Endpoint |
 | API Version | e.g., `2024-08-01-preview` | Can also be set per-node in the node parameters |
 
-> **Endpoint resolution note:** The Pay-i Azure node constructs the upstream endpoint from your resource name using the standard Azure pattern (`https://<resource-name>.openai.azure.com`). If your Azure deployment uses a custom domain or a non-standard endpoint URL, enter the full endpoint URL in the Resource Name field instead of just the resource name — the node handles both forms.
+> **Endpoint resolution note:** The Ascerta Azure node constructs the upstream endpoint from your resource name using the standard Azure pattern (`https://<resource-name>.openai.azure.com`). If your Azure deployment uses a custom domain or a non-standard endpoint URL, enter the full endpoint URL in the Resource Name field instead of just the resource name — the node handles both forms.
 
 ---
 
@@ -209,7 +209,7 @@ If you already have an Anthropic credential in n8n, reuse it.
 
 **Credential type:** `AWS` (built-in n8n credential)
 
-AWS SigV4 request signing is handled automatically by the Pay-i Bedrock node. You only need to supply the credentials.
+AWS SigV4 request signing is handled automatically by the Ascerta Bedrock node. You only need to supply the credentials.
 
 | Field | Value | Notes |
 |-------|-------|-------|
@@ -222,9 +222,9 @@ AWS SigV4 request signing is handled automatically by the Pay-i Bedrock node. Yo
 
 ### 4.6 Databricks Credential
 
-**Credential type:** `Pay-i Databricks API` (provided by this community node)
+**Credential type:** `Ascerta Databricks API` (provided by this community node)
 
-> **No extra package required.** This package ships its own `payiDatabricksApi` credential type — namespaced to avoid collision with n8n's built-in `databricksApi` credential, which uses different field names. You do not need to install `n8n-nodes-databricks`.
+> **No extra package required.** This package ships its own `ascertaDatabricksApi` credential type — namespaced to avoid collision with n8n's built-in `databricksApi` credential, which uses different field names. You do not need to install `n8n-nodes-databricks`.
 
 | Field | Value | Notes |
 |-------|-------|-------|
@@ -235,16 +235,16 @@ AWS SigV4 request signing is handled automatically by the Pay-i Bedrock node. Yo
 
 ## 5. Verification
 
-Run this smoke test after completing installation and credential setup. It confirms the node is installed, the credentials work, and requests are reaching your Pay-i instance.
+Run this smoke test after completing installation and credential setup. It confirms the node is installed, the credentials work, and requests are reaching your Ascerta instance.
 
 ### Build the Smoke Test Workflow
 
 1. Create a new workflow in n8n.
 2. Add a **Manual Chat Trigger** node.
 3. Add an **AI Agent** node. Connect the Manual Chat Trigger to it.
-4. In the AI Agent node, click the **Chat Model** connector and add a **Pay-i OpenAI (Proxy)** node.
-5. Configure the Pay-i OpenAI node:
-   - **Pay-i API credential:** select the credential you created in [Section 4.1](#41-pay-i-api-credential)
+4. In the AI Agent node, click the **Chat Model** connector and add a **Ascerta OpenAI (Proxy)** node.
+5. Configure the Ascerta OpenAI node:
+   - **Ascerta API credential:** select the credential you created in [Section 4.1](#41-ascerta-api-credential)
    - **OpenAI API credential:** select the credential from [Section 4.2](#42-openai-api-credential)
    - **Model:** `gpt-4o` (or any model available on your OpenAI account)
    - Under **Options**, set:
@@ -260,34 +260,34 @@ Run this smoke test after completing installation and credential setup. It confi
 With Debug Logging enabled, the n8n execution log will contain entries like this:
 
 ```
-[Pay-i OpenAI] ──── DEBUG (item 0) ────
-[Pay-i OpenAI] model="gpt-4o" baseURL="https://api.yourcompany.pay-i.com/api/v1/proxy/openai/v1"
-[Pay-i OpenAI] Headers: {
+[Ascerta OpenAI] ──── DEBUG (item 0) ────
+[Ascerta OpenAI] model="gpt-4o" baseURL="https://api.yourcompany.ascerta.com/api/v1/proxy/openai/v1"
+[Ascerta OpenAI] Headers: {
   "xProxy-Api-Key": "pi_live_****",
   "xProxy-User-ID": "smoke-test",
   "xProxy-UseCase-Name": "verification"
 }
 ```
 
-Confirm that `baseURL` shows **your dedicated Pay-i instance URL**, not `api.pay-i.com`. Confirm the `xProxy-Api-Key` is masked but present. If the workflow executes and returns a response, your installation is working.
+Confirm that `baseURL` shows **your dedicated Ascerta instance URL**, not `api.ascerta.com`. Confirm the `xProxy-Api-Key` is masked but present. If the workflow executes and returns a response, your installation is working.
 
-Check your Pay-i dashboard — the verification request should appear in usage data within a few minutes.
+Check your Ascerta dashboard — the verification request should appear in usage data within a few minutes.
 
 ### Common Failures at This Stage
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
-| "Pay-i OpenAI" not in node panel | Node not installed or cache not cleared | See [Option A](#option-a-community-node-ui) restart step or clear `~/.n8n/.cache` |
+| "Ascerta OpenAI" not in node panel | Node not installed or cache not cleared | See [Option A](#option-a-community-node-ui) restart step or clear `~/.n8n/.cache` |
 | Cannot attach node to AI Agent | `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` not set | See [Section 3](#3-environment-configuration) |
-| 401 Unauthorized from Pay-i | Wrong API key or wrong Base URL | Recheck [Section 4.1](#41-pay-i-api-credential) |
+| 401 Unauthorized from Ascerta | Wrong API key or wrong Base URL | Recheck [Section 4.1](#41-ascerta-api-credential) |
 | 401 from OpenAI | OpenAI credential invalid or expired | Verify API key at platform.openai.com |
-| No data in Pay-i dashboard | Base URL points to wrong instance | Confirm your dedicated URL with Pay-i support |
+| No data in Ascerta dashboard | Base URL points to wrong instance | Confirm your dedicated URL with Ascerta support |
 
 ---
 
 ## 6. Tracking & Attribution
 
-Pay-i's value comes from being able to slice cost and usage data in ways that matter to your organization. The tracking fields give you control over how that data is labeled.
+Ascerta's value comes from being able to slice cost and usage data in ways that matter to your organization. The tracking fields give you control over how that data is labeled.
 
 **Think about it this way: how do you want to answer these questions?**
 
@@ -303,7 +303,7 @@ Pay-i's value comes from being able to slice cost and usage data in ways that ma
 | User ID | `userId` | Tags the request to a person or system account | Set to the n8n user, authenticated end user, or service identity |
 | Use Case Name | `useCaseName` | Tags the request to a workflow or business purpose | Set to something readable: `invoice-extraction`, `support-triage`, `code-review` |
 | Use Case ID | `useCaseId` | Identifies the logical use case (one canvas node = one use case) | Defaults to `{{ $nodeId }}` — the node's stable UUID. Override only when you need a correlation ID from an external system |
-| Use Case Step | `useCaseStep` | Tags a specific node within a workflow | Defaults to the node display name (e.g. `Pay-i Databricks (Proxy)`) — override with a custom label when you have multiple Pay-i nodes in one workflow |
+| Use Case Step | `useCaseStep` | Tags a specific node within a workflow | Defaults to the node display name (e.g. `Ascerta Databricks (Proxy)`) — override with a custom label when you have multiple Ascerta nodes in one workflow |
 
 ### Advanced Fields
 
@@ -311,14 +311,14 @@ Pay-i's value comes from being able to slice cost and usage data in ways that ma
 |-------|------|-------------|
 | Use Case Version | string | Track model or prompt versions — useful when A/B testing prompts. For example, `v2.1-chain-of-thought` |
 | Use Case Properties | JSON object | Arbitrary key-value metadata for filtering in the dashboard. For example, `{"team": "finance", "env": "prod"}` |
-| Limit IDs | string (comma-separated) | Associate this request with one or more Pay-i Limits by ID |
+| Limit IDs | string (comma-separated) | Associate this request with one or more Ascerta Limits by ID |
 | Debug Logging | boolean | Emit request details to n8n execution log. Enable during setup and troubleshooting; disable in production to reduce log volume |
 
 ### Practical Setup Recommendations
 
 For most deployments:
 
-- **Always set User ID and Use Case Name.** These are the two fields Pay-i dashboards filter on most.
+- **Always set User ID and Use Case Name.** These are the two fields Ascerta dashboards filter on most.
 - Use **n8n expressions** to make these dynamic: `={{ $json.userId }}` or `={{ $workflow.name }}`.
 - If you run multiple environments (dev, staging, prod), encode the environment in Use Case Properties rather than in the Use Case Name itself.
 - Leave Use Case ID and Use Case Step as defaults unless you have a specific correlation requirement.
@@ -329,7 +329,7 @@ For most deployments:
 
 ### First Step: Enable Debug Logging
 
-Before investigating any issue, turn on Debug Logging in the Pay-i node's Options. This emits the full request configuration — Base URL, masked API key, and all tracking headers — to the n8n execution log. Most issues are immediately visible once you can see these values.
+Before investigating any issue, turn on Debug Logging in the Ascerta node's Options. This emits the full request configuration — Base URL, masked API key, and all tracking headers — to the n8n execution log. Most issues are immediately visible once you can see these values.
 
 **Accessing logs:**
 
@@ -341,29 +341,29 @@ Before investigating any issue, turn on Debug Logging in the Pay-i node's Option
 
 | Issue | Symptom | Cause | Resolution |
 |-------|---------|-------|------------|
-| Node not in palette | "Pay-i OpenAI" missing from node search | n8n cache not cleared after install | Clear `~/.n8n/.cache` and restart n8n |
+| Node not in palette | "Ascerta OpenAI" missing from node search | n8n cache not cleared after install | Clear `~/.n8n/.cache` and restart n8n |
 | Cannot connect node to AI Agent | Node appears but cannot be wired as Chat Model | `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true` not set | Set the environment variable and restart n8n (see [Section 3](#3-environment-configuration)) |
-| Invalid API Key / authentication error | Execution fails with 401 from Pay-i | Wrong API key, or wrong Base URL pointing to a different instance | Re-enter the API key; confirm the Base URL is your dedicated instance URL |
+| Invalid API Key / authentication error | Execution fails with 401 from Ascerta | Wrong API key, or wrong Base URL pointing to a different instance | Re-enter the API key; confirm the Base URL is your dedicated instance URL |
 | 401 from upstream provider | Execution fails with 401 from OpenAI / Anthropic / Azure | Provider credential invalid or expired | Test the provider key directly (curl or provider console); update credential in n8n |
-| No data in Pay-i dashboard | Workflows succeed but usage doesn't appear | Base URL is incorrect — requests are reaching the wrong endpoint | Enable Debug Logging and confirm the `baseURL` in the log matches your dedicated instance |
+| No data in Ascerta dashboard | Workflows succeed but usage doesn't appear | Base URL is incorrect — requests are reaching the wrong endpoint | Enable Debug Logging and confirm the `baseURL` in the log matches your dedicated instance |
 | Azure `DeploymentNotFound` | Azure requests fail with deployment not found error | Deployment name doesn't match, or endpoint resolution is wrong | Verify the deployment name in Azure portal; if using a custom domain, enter the full endpoint URL in the credential's Resource Name field |
 | Bedrock signature mismatch | AWS requests fail with signature errors | Region in credential doesn't match the region where the model is enabled | Confirm the region in your AWS credential matches your Bedrock model deployment region |
 | Databricks `RESOURCE_DOES_NOT_EXIST` | Databricks requests fail with resource error | Workspace URL is incorrect or the model serving endpoint doesn't exist | Confirm the full workspace URL (including `https://`); verify the endpoint exists in Databricks UI > Serving |
-| Network timeout | Requests time out with no response | Firewall or network policy blocking outbound HTTPS from n8n host to Pay-i | Confirm the n8n host can reach your Pay-i Base URL on port 443: `curl -v https://api.yourcompany.pay-i.com` |
+| Network timeout | Requests time out with no response | Firewall or network policy blocking outbound HTTPS from n8n host to Ascerta | Confirm the n8n host can reach your Ascerta Base URL on port 443: `curl -v https://api.yourcompany.ascerta.com` |
 
 ### Getting Help
 
-If the table above doesn't resolve your issue, contact Pay-i support with the details below. Providing this upfront significantly reduces back-and-forth.
+If the table above doesn't resolve your issue, contact Ascerta support with the details below. Providing this upfront significantly reduces back-and-forth.
 
 | Channel | Link |
 |---------|------|
-| Email | [support@pay-i.com](mailto:support@pay-i.com) |
-| Support portal | [https://www.pay-i.com/support](https://www.pay-i.com/support) |
-| GitHub Issues | [https://github.com/Pay-i/n8n-nodes-payi/issues](https://github.com/Pay-i/n8n-nodes-payi/issues) |
+| Email | [support@ascerta.com](mailto:support@ascerta.com) |
+| Support portal | [https://www.ascerta.com/support](https://www.ascerta.com/support) |
+| GitHub Issues | [https://github.com/ascerta-dev/n8n-nodes-ascerta/issues](https://github.com/ascerta-dev/n8n-nodes-ascerta/issues) |
 
 **When reporting an issue, include:**
 
-- `n8n-nodes-payi` package version (from `package.json` or `npm list n8n-nodes-payi`)
+- `@ascerta/n8n-nodes-ascerta` package version (from `package.json` or `npm list @ascerta/n8n-nodes-ascerta`)
 - n8n version (`n8n --version` or the version shown in n8n Settings)
 - The Debug Log output from the failing execution (mask your API key — `pi_live_****` is fine)
 - The full error message or HTTP status code
