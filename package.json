@@ -1,6 +1,6 @@
 {
 	"name": "@ascerta/n8n-nodes-ascerta",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "n8n community node for routing LLM requests through Ascerta proxy with cost tracking and budget enforcement",
 	"keywords": [
 		"n8n-community-node-package",
