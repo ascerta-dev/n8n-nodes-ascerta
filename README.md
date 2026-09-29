@@ -1,17 +1,17 @@
-# n8n-nodes-payi
+# n8n-nodes-ascerta
 
-n8n community node for [Pay-i](https://pay-i.com) — add cost tracking, budget enforcement, and usage attribution to every LLM call in your n8n workflows.
+n8n community node for [Ascerta](https://ascerta.com) — add cost tracking, budget enforcement, and usage attribution to every LLM call in your n8n workflows.
 
-## What is Pay-i?
+## What is Ascerta?
 
-[Pay-i](https://pay-i.com) is an AI cost management platform. It sits as a transparent proxy between your application and LLM providers (OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, Databricks, and more), giving you:
+[Ascerta](https://ascerta.com) is an AI cost management platform. It sits as a transparent proxy between your application and LLM providers (OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, Databricks, and more), giving you:
 
 - **Real-time cost visibility** — See the dollar cost of every LLM request as it happens, broken down by input/output tokens
 - **Budget enforcement** — Set hard spending limits per user, team, use case, or workflow so costs never run away
 - **Usage attribution** — Know exactly who and what is driving your AI spend with per-user and per-use-case tracking
-- **Zero code changes** — Pay-i is a drop-in proxy. Your prompts, models, and provider API keys stay the same. Just route through Pay-i and you're tracked.
+- **Zero code changes** — Ascerta is a drop-in proxy. Your prompts, models, and provider API keys stay the same. Just route through Ascerta and you're tracked.
 
-Learn more at [pay-i.com](https://pay-i.com) or read the [Pay-i documentation](https://docs.pay-i.com).
+Learn more at [ascerta.com](https://ascerta.com) or read the [Ascerta documentation](https://docs.ascerta.com).
 
 ## Nodes
 
@@ -23,17 +23,17 @@ These nodes plug directly into n8n's **AI Agent** node as a chat model input. Ea
 
 | Node | Provider | Credential | Docs |
 |------|----------|------------|------|
-| **Pay-i OpenAI (Proxy)** | OpenAI | `openAiApi` | [docs/providers/openai.md](docs/providers/openai.md) |
-| **Pay-i Anthropic (Proxy)** | Anthropic | `anthropicApi` | [docs/providers/anthropic.md](docs/providers/anthropic.md) |
-| **Pay-i Azure AI Foundry (Proxy)** | Azure OpenAI | `azureOpenAiApi` | [docs/providers/azure.md](docs/providers/azure.md) |
-| **Pay-i Amazon Bedrock (Proxy)** | AWS Bedrock | `aws` | [docs/providers/bedrock.md](docs/providers/bedrock.md) |
-| **Pay-i Databricks (Proxy)** | Databricks | `payiDatabricksApi` | [docs/providers/databricks.md](docs/providers/databricks.md) |
+| **Ascerta OpenAI (Proxy)** | OpenAI | `openAiApi` | [docs/providers/openai.md](docs/providers/openai.md) |
+| **Ascerta Anthropic (Proxy)** | Anthropic | `anthropicApi` | [docs/providers/anthropic.md](docs/providers/anthropic.md) |
+| **Ascerta Azure AI Foundry (Proxy)** | Azure OpenAI | `azureOpenAiApi` | [docs/providers/azure.md](docs/providers/azure.md) |
+| **Ascerta Amazon Bedrock (Proxy)** | AWS Bedrock | `aws` | [docs/providers/bedrock.md](docs/providers/bedrock.md) |
+| **Ascerta Databricks (Proxy)** | Databricks | `ascertaDatabricksApi` | [docs/providers/databricks.md](docs/providers/databricks.md) |
 
 ### Generic Proxy Node
 
 | Node | Description |
 |------|-------------|
-| **Pay-i Proxy** | Direct HTTP proxy for any supported provider. Full control over the request body, provider, and model. Supports OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, and Databricks. |
+| **Ascerta Proxy** | Direct HTTP proxy for any supported provider. Full control over the request body, provider, and model. Supports OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, and Databricks. |
 
 ## Installation
 
@@ -41,35 +41,35 @@ These nodes plug directly into n8n's **AI Agent** node as a chat model input. Ea
 
 1. In your n8n instance, go to **Settings > Community Nodes**
 2. Select **Install a community node**
-3. Enter `n8n-nodes-payi`
+3. Enter `n8n-nodes-ascerta`
 4. Agree to the risks and click **Install**
 
 ### Manual Installation
 
 ```bash
 cd ~/.n8n/nodes
-npm install n8n-nodes-payi
+npm install n8n-nodes-ascerta
 ```
 
 Restart n8n after installing.
 
-> **AI Agent usage:** To use the Pay-i Chat Model nodes with n8n's AI Agent node, start n8n with `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true`.
+> **AI Agent usage:** To use the Ascerta Chat Model nodes with n8n's AI Agent node, start n8n with `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true`.
 
 ## Prerequisites
 
-- A [Pay-i](https://pay-i.com) account and API key
+- An [Ascerta](https://ascerta.com) account and API key
 - An API key or credential for at least one supported LLM provider
 
 ## Setup
 
-> **Self-hosted deployment?** For detailed instructions including Docker installation, dedicated Pay-i instance configuration, and troubleshooting, see the [Deployment & Configuration Guide](docs/deployment-guide.md).
+> **Self-hosted deployment?** For detailed instructions including Docker installation, dedicated Ascerta instance configuration, and troubleshooting, see the [Deployment & Configuration Guide](docs/deployment-guide.md).
 
-### 1. Configure Pay-i Credentials
+### 1. Configure Ascerta Credentials
 
-When you first add a Pay-i node to a workflow, n8n will prompt you to configure credentials:
+When you first add an Ascerta node to a workflow, n8n will prompt you to configure credentials:
 
-- **API Key** — Your Pay-i API key (found in the Pay-i dashboard)
-- **Base URL** — Defaults to `https://api.pay-i.com`. Change this only if you're using a self-hosted Pay-i instance.
+- **API Key** — Your Ascerta API key (found in the Ascerta dashboard)
+- **Base URL** — Enter your dedicated Ascerta instance URL, such as `https://api.yourcompany.ascerta.com`.
 
 ### 2. Configure Provider Credentials
 
@@ -80,34 +80,34 @@ Each chat model node uses the provider's native n8n credential type. If you alre
 For AI Agent workflows:
 1. Add a **Chat Trigger** or **Manual Chat Trigger** node
 2. Add an **AI Agent** node
-3. Add the appropriate **Pay-i [Provider] (Proxy)** node and connect it to the AI Agent's "Chat Model" input
+3. Add the appropriate **Ascerta [Provider] (Proxy)** node and connect it to the AI Agent's "Chat Model" input
 4. Configure the model parameters (model ID, endpoint name, etc.)
 
 ## Tracking Headers
 
-Pay-i uses custom HTTP headers to associate requests with users, Use Cases, and Limits. All tracking fields are optional and have smart defaults.
+Ascerta uses custom HTTP headers to associate requests with users, Use Cases, and Limits. All tracking fields are optional and have smart defaults.
 
 | Field | Default | Description |
 |-------|---------|-------------|
 | **xProxy-User-ID** | _(empty)_ | User identifier for per-user cost attribution |
 | **xProxy-UseCase-Name** | Workflow name | Use Case Name for tracking and KPI scoring |
 | **xProxy-UseCase-ID** | `{nodeId}` (UUID) | Stable per-node ID — all runs of one canvas node aggregate under one use case |
-| **xProxy-UseCase-Step** | Node display name (e.g. `Pay-i Databricks (Proxy)`) | Step within a multi-step workflow — override with a custom label when useful |
+| **xProxy-UseCase-Step** | Node display name (e.g. `Ascerta Databricks (Proxy)`) | Step within a multi-step workflow — override with a custom label when useful |
 
 ### Advanced Tracking (collapsed in UI)
 
-These fields are available under the "Advanced Tracking" section and should typically only be modified with guidance from Pay-i Support:
+These fields are available under the "Advanced Tracking" section and should typically only be modified with guidance from Ascerta Support:
 
 | Field | Description |
 |-------|-------------|
 | **xProxy-UseCase-Version** | Version of the use case definition |
 | **xProxy-UseCase-Properties** | JSON object of key-value properties |
-| **xProxy-Limit-IDs** | Comma-separated list of Pay-i Limit IDs to enforce |
+| **xProxy-Limit-IDs** | Comma-separated list of Ascerta Limit IDs to enforce |
 | **Debug Logging** | Logs request URLs, headers, and routing details to the n8n server console |
 
 ## Supported Proxy Paths
 
-All requests are routed through: `{PAYI_BASE_URL}/api/v1/proxy/{provider_path}`
+All requests are routed through: `{ASCERTA_BASE_URL}/api/v1/proxy/{provider_path}`
 
 | Provider | Proxy Path |
 |----------|-----------|
@@ -119,16 +119,16 @@ All requests are routed through: `{PAYI_BASE_URL}/api/v1/proxy/{provider_path}`
 
 ## Migrating Existing Workflows
 
-Already have n8n workflows calling OpenAI, Anthropic, Databricks, or other LLM providers natively? The **[payi-utilities n8n-toolkit](https://github.com/Pay-i/utilities)** can scan your n8n instance, find native LLM nodes, and replace them with Pay-i equivalents — rewiring all connections and credentials automatically.
+Already have n8n workflows calling OpenAI, Anthropic, Databricks, or other LLM providers natively? The **[ascerta-utilities n8n-toolkit](https://github.com/ascerta-dev/utilities)** can scan your n8n instance, find native LLM nodes, and replace them with Ascerta equivalents — rewiring all connections and credentials automatically.
 
 ```bash
 export N8N_BASE_URL=http://localhost:5678
 export N8N_API_KEY=your-n8n-api-key
-export PAYI_BASE_URL=https://api.yourcompany.pay-i.com
-export PAYI_API_KEY=your-payi-api-key
+export ASCERTA_BASE_URL=https://api.yourcompany.ascerta.com
+export ASCERTA_API_KEY=your-ascerta-api-key
 
-python3 migrate-workflows-to-payi.py --dry-run   # preview changes
-python3 migrate-workflows-to-payi.py              # run migration
+python3 migrate-workflows-to-ascerta.py --dry-run   # preview changes
+python3 migrate-workflows-to-ascerta.py              # run migration
 ```
 
 ## Development
@@ -146,16 +146,16 @@ npm run format    # Prettier
 
 ```bash
 npm pack
-cd ~/.n8n/nodes && npm install /path/to/n8n-nodes-payi-*.tgz
+cd ~/.n8n/nodes && npm install /path/to/n8n-nodes-ascerta-*.tgz
 rm -rf ~/.n8n/.cache   # Clear n8n cache after updates
 # Restart n8n
 ```
 
 ## Support
 
-- Email: [support@pay-i.com](mailto:support@pay-i.com)
-- Support Portal: [https://www.pay-i.com/support](https://www.pay-i.com/support)
-- GitHub Issues: [https://github.com/pay-i/n8n-nodes-payi/issues](https://github.com/pay-i/n8n-nodes-payi/issues)
+- Email: [support@ascerta.com](mailto:support@ascerta.com)
+- Support Portal: [https://www.ascerta.com/support](https://www.ascerta.com/support)
+- GitHub Issues: [https://github.com/ascerta-dev/n8n-nodes-ascerta/issues](https://github.com/ascerta-dev/n8n-nodes-ascerta/issues)
 
 ## License
 

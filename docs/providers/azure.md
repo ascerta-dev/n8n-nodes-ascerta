@@ -1,14 +1,14 @@
-# Pay-i Azure AI Foundry (Proxy)
+# Ascerta Azure AI Foundry (Proxy)
 
-Routes Azure OpenAI (Azure AI Foundry) chat model requests through the Pay-i proxy for cost tracking, budget enforcement, and usage analytics.
+Routes Azure OpenAI (Azure AI Foundry) chat model requests through the Ascerta proxy for cost tracking, budget enforcement, and usage analytics.
 
 ## Node Details
 
 | Property | Value |
 |----------|-------|
-| Display Name | Pay-i Azure AI Foundry (Proxy) |
-| Node Name | `lmChatPayiAzure` |
-| n8n Type | `n8n-nodes-payi.lmChatPayiAzure` |
+| Display Name | Ascerta Azure AI Foundry (Proxy) |
+| Node Name | `lmChatAscertaAzure` |
+| n8n Type | `n8n-nodes-ascerta.lmChatAscertaAzure` |
 | LangChain Class | `ChatOpenAI` (`@langchain/openai`) |
 | Proxy Path | `/api/v1/proxy/azure.openai` |
 
@@ -16,10 +16,10 @@ Routes Azure OpenAI (Azure AI Foundry) chat model requests through the Pay-i pro
 
 | Credential | Type | Source |
 |------------|------|--------|
-| Pay-i API | `payiApi` | Pay-i community node |
+| Ascerta API | `ascertaApi` | Ascerta community node |
 | Azure OpenAI API | `azureOpenAiApi` | Built-in n8n credential |
 
-The Azure OpenAI credential provides the resource name or explicit endpoint URL and the API key. The node reads both fields to construct the upstream routing header sent to the Pay-i proxy.
+The Azure OpenAI credential provides the resource name or explicit endpoint URL and the API key. The node reads both fields to construct the upstream routing header sent to the Ascerta proxy.
 
 ## Endpoint Resolution
 
@@ -30,7 +30,7 @@ The upstream Azure endpoint is resolved from the credential at runtime:
 1. If the credential has an explicit `endpoint` field set, that value is used (trailing slashes stripped)
 2. Otherwise, the endpoint is constructed as `https://{resourceName}.openai.azure.com`
 
-The resolved endpoint is sent in the `xProxy-Provider-BaseUri` header so Pay-i knows where to forward the request.
+The resolved endpoint is sent in the `xProxy-Provider-BaseUri` header so Ascerta knows where to forward the request.
 
 ### Examples
 
@@ -84,11 +84,11 @@ The resolved version is appended as `?api-version={v}` on every request. Some fe
 
 ```
 n8n Workflow
-  └─ Pay-i Azure AI Foundry (Proxy)
-       ├─ Credentials: Pay-i API key + Azure OpenAI API key
-       └─ POST {payiBaseUrl}/api/v1/proxy/azure.openai/openai/deployments/{deployment}/chat/completions?api-version={v}
+  └─ Ascerta Azure AI Foundry (Proxy)
+       ├─ Credentials: Ascerta API key + Azure OpenAI API key
+       └─ POST {ascertaBaseUrl}/api/v1/proxy/azure.openai/openai/deployments/{deployment}/chat/completions?api-version={v}
             Headers:
-              xProxy-Api-Key:          {payi_api_key}
+              xProxy-Api-Key:          {ascerta_api_key}
               xProxy-Provider-BaseUri: {azure_endpoint}      ← resolved per rules above
               xProxy-PriceAs-Resource: {deployment_name}     ← used for cost mapping
               api-key:                 {azure_api_key}        ← forwarded to Azure
@@ -106,10 +106,10 @@ n8n Workflow
 The node uses `ChatOpenAI` from `@langchain/openai` rather than `AzureChatOpenAI` for three reasons:
 
 1. **Wire format is identical** — Azure OpenAI uses the same JSON schema as OpenAI for `chat/completions` requests
-2. **Direct header control** — `ChatOpenAI` accepts `baseURL` and `defaultHeaders` in its configuration object, which is exactly what Pay-i's proxy flow requires
-3. **Auth conflict** — `AzureChatOpenAI` performs its own internal auth header injection and request-time overrides that conflict with Pay-i's proxy authentication; using `ChatOpenAI` sidesteps that entirely
+2. **Direct header control** — `ChatOpenAI` accepts `baseURL` and `defaultHeaders` in its configuration object, which is exactly what Ascerta's proxy flow requires
+3. **Auth conflict** — `AzureChatOpenAI` performs its own internal auth header injection and request-time overrides that conflict with Ascerta's proxy authentication; using `ChatOpenAI` sidesteps that entirely
 
-The result is a clean proxy path: the node constructs the full deployment URL, sets the `api-key` header once, and lets Pay-i handle routing.
+The result is a clean proxy path: the node constructs the full deployment URL, sets the `api-key` header once, and lets Ascerta handle routing.
 
 ## Azure OpenAI Pricing
 
@@ -122,13 +122,13 @@ Azure OpenAI pricing varies by deployment type:
 | Global Standard | Routes across Azure regions; same per-token rate as Standard |
 | Data Zone Standard | Routes within a geographic data zone; similar to Global Standard |
 
-Pay-i uses the `xProxy-PriceAs-Resource` header — set to the deployment name — to look up the correct pricing entry for cost tracking and budget enforcement. Ensure your deployment name in the node matches the resource name configured in your Pay-i account.
+Ascerta uses the `xProxy-PriceAs-Resource` header — set to the deployment name — to look up the correct pricing entry for cost tracking and budget enforcement. Ensure your deployment name in the node matches the resource name configured in your Ascerta account.
 
 For current token rates by model, see the [Azure OpenAI pricing page](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/).
 
 ## Migration
 
-The n8n migration toolkit automatically detects the following native node and replaces it with this Pay-i node:
+The n8n migration toolkit automatically detects the following native node and replaces it with this Ascerta node:
 
 - `@n8n/n8n-nodes-langchain.lmChatAzureOpenAi`
 

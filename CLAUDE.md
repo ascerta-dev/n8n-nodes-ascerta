@@ -1,8 +1,8 @@
-# CLAUDE.md — n8n-nodes-payi
+# CLAUDE.md — n8n-nodes-ascerta
 
 ## What This Is
 
-n8n community node package for routing LLM requests through Pay-i proxy with cost tracking and budget enforcement. Published to npm as `n8n-nodes-payi`.
+n8n community node package for routing LLM requests through Ascerta proxy with cost tracking and budget enforcement. Published to npm as `n8n-nodes-ascerta`.
 
 ## Stack
 
@@ -28,13 +28,13 @@ npm pack            # Build and pack for local testing
 ## Architecture
 
 ```
-credentials/          # n8n credential types (PayiApi, DatabricksApi)
-nodes/Payi/           # All node implementations
+credentials/          # n8n credential types (AscertaApi, AscertaDatabricksApi)
+nodes/Ascerta/        # All node implementations
   descriptions/       # Field definitions (tracking, provider, output fields)
   providers/          # Provider routing logic
-  Payi.node.ts        # Generic proxy node
-  PayiChatModel*.ts   # Provider-specific LangChain chat model nodes
-  payi_logo.png       # Node icon (copied to dist/ at build time)
+  Ascerta.node.ts        # Generic proxy node
+  AscertaChatModel*.ts   # Provider-specific LangChain chat model nodes
+  ascerta_logo.svg       # Node icon (copied to dist/ at build time)
 scripts/
   copy-icons.js       # Build step: copies icons from nodes/ to dist/nodes/
 docs/
@@ -52,7 +52,7 @@ docs/
 
 ```bash
 npm pack
-cd ~/.n8n/nodes && npm install /path/to/n8n-nodes-payi-*.tgz
+cd ~/.n8n/nodes && npm install /path/to/n8n-nodes-ascerta-*.tgz
 rm -rf ~/.n8n/.cache   # Clear n8n cache
 # Restart n8n
 ```
@@ -61,8 +61,8 @@ For AI Agent usage, start n8n with: `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=tru
 
 ## Companion Toolkit
 
-The [payi-utilities/n8n-toolkit](https://github.com/Pay-i/utilities) provides migration and audit scripts that scan n8n instances and replace native LLM nodes with Pay-i equivalents.
+The [Ascerta utilities toolkit](https://github.com/ascerta-dev/utilities) provides migration and audit scripts that scan n8n instances and replace native LLM nodes with Ascerta equivalents.
 
 ## Confidentiality
 
-This is a Pay-i project. All data classification and confidentiality rules from the root `~/src/CLAUDE.md` apply.
+This is an Ascerta project. All data classification and confidentiality rules from the root `~/src/CLAUDE.md` apply.

@@ -1,16 +1,16 @@
-# Pay-i Databricks (Proxy)
+# Ascerta Databricks (Proxy)
 
-Routes Databricks Model Serving chat model requests through the Pay-i proxy for cost tracking, budget enforcement, and usage analytics.
+Routes Databricks Model Serving chat model requests through the Ascerta proxy for cost tracking, budget enforcement, and usage analytics.
 
-> **This node works for standard Databricks Model Serving endpoints** — endpoints that expose the OpenAI-compatible `chat/completions` path under `/serving-endpoints` on your workspace URL. If you're using **Agent Bricks**, or need to import historical usage data, the proxy path isn't available for those workload types. Contact [Pay-i support](https://www.pay-i.com/support) about post-hoc ingestion options for those workloads.
+> **This node works for standard Databricks Model Serving endpoints** — endpoints that expose the OpenAI-compatible `chat/completions` path under `/serving-endpoints` on your workspace URL. If you're using **Agent Bricks**, or need to import historical usage data, the proxy path isn't available for those workload types. Contact [Ascerta support](https://www.ascerta.com/support) about post-hoc ingestion options for those workloads.
 
 ## Node Details
 
 | Property | Value |
 |----------|-------|
-| Display Name | Pay-i Databricks (Proxy) |
-| Node Name | `lmChatPayiDatabricks` |
-| n8n Type | `n8n-nodes-payi.lmChatPayiDatabricks` |
+| Display Name | Ascerta Databricks (Proxy) |
+| Node Name | `lmChatAscertaDatabricks` |
+| n8n Type | `n8n-nodes-ascerta.lmChatAscertaDatabricks` |
 | LangChain Class | `ChatOpenAI` (`@langchain/openai`) |
 | Proxy Path | `/api/v1/proxy/openai/v1` (reuses OpenAI path) |
 
@@ -18,10 +18,10 @@ Routes Databricks Model Serving chat model requests through the Pay-i proxy for 
 
 | Credential | Type | Source |
 |------------|------|--------|
-| Pay-i API | `payiApi` | Pay-i community node |
-| Pay-i Databricks API | `payiDatabricksApi` | Pay-i community node |
+| Ascerta API | `ascertaApi` | Ascerta community node |
+| Ascerta Databricks API | `ascertaDatabricksApi` | Ascerta community node |
 
-The Pay-i Databricks API credential stores the workspace URL (`workspaceUrl`) and Personal Access Token (`accessToken`). The credential type is namespaced as `payiDatabricksApi` to avoid collision with n8n's built-in `databricksApi` credential (which uses different field names: `host`/`token`).
+The Ascerta Databricks API credential stores the workspace URL (`workspaceUrl`) and Personal Access Token (`accessToken`). The credential type is namespaced as `ascertaDatabricksApi` to avoid collision with n8n's built-in `databricksApi` credential (which uses different field names: `host`/`token`).
 
 ## Parameters
 
@@ -44,21 +44,21 @@ The Pay-i Databricks API credential stores the workspace URL (`workspaceUrl`) an
 
 ```
 n8n Workflow
-  └─ Pay-i Databricks (Proxy)
-       ├─ Credentials: Pay-i API key + Databricks PAT
-       └─ POST {payiBaseUrl}/api/v1/proxy/openai/v1/chat/completions
+  └─ Ascerta Databricks (Proxy)
+       ├─ Credentials: Ascerta API key + Databricks PAT
+       └─ POST {ascertaBaseUrl}/api/v1/proxy/openai/v1/chat/completions
             Headers:
-              xProxy-Api-Key:          {payi_key}
+              xProxy-Api-Key:          {ascerta_key}
               xProxy-Provider-BaseUri: {workspace_url}/serving-endpoints
               xProxy-PriceAs-Category: system.databricks.{cloud}
               Authorization:           Bearer {databricks_pat}
 ```
 
-Databricks Model Serving exposes an OpenAI-compatible chat/completions endpoint, so the node uses `ChatOpenAI` from LangChain and routes through Pay-i's existing OpenAI proxy path. No dedicated Databricks proxy path is needed.
+Databricks Model Serving exposes an OpenAI-compatible chat/completions endpoint, so the node uses `ChatOpenAI` from LangChain and routes through Ascerta's existing OpenAI proxy path. No dedicated Databricks proxy path is needed.
 
 ### Provider Base URI
 
-The node points Pay-i at the workspace's Model Serving entry point — `<workspace>/serving-endpoints`. The Pay-i proxy appends `/chat/completions`, so the upstream call lands on Databricks' OpenAI-compatible chat endpoint:
+The node points Ascerta at the workspace's Model Serving entry point — `<workspace>/serving-endpoints`. The Ascerta proxy appends `/chat/completions`, so the upstream call lands on Databricks' OpenAI-compatible chat endpoint:
 
 | Cloud | Workspace URL | Provider Base URI |
 |-------|--------------|-------------------|
@@ -68,7 +68,7 @@ The node points Pay-i at the workspace's Model Serving entry point — `<workspa
 
 ### Pricing Headers
 
-The `xProxy-PriceAs-Category` header tells Pay-i which pricing table to use:
+The `xProxy-PriceAs-Category` header tells Ascerta which pricing table to use:
 
 | Cloud | Header Value |
 |-------|-------------|
@@ -80,7 +80,7 @@ The cloud provider cannot be reliably inferred from the workspace URL alone (AWS
 
 ## Cloud-Specific Setup
 
-Databricks runs on AWS, Azure, and GCP. While the Pay-i node works identically across all three, the workspace setup, URL patterns, and pricing differ per cloud. This section covers what you need to know for each.
+Databricks runs on AWS, Azure, and GCP. While the Ascerta node works identically across all three, the workspace setup, URL patterns, and pricing differ per cloud. This section covers what you need to know for each.
 
 ### AWS
 
@@ -90,7 +90,7 @@ AWS is the most common Databricks deployment and the node's default cloud provid
 
 The workspace ID is a numeric identifier (for example, `1234567890123456`). You can find your workspace URL in the Databricks account console or by looking at the browser URL when logged into your workspace.
 
-**Credential:** A Databricks Personal Access Token (PAT) generated from your AWS-hosted workspace under **User Settings > Developer > Access Tokens**. Stored in n8n as a `Pay-i Databricks API` credential (workspace URL + PAT).
+**Credential:** A Databricks Personal Access Token (PAT) generated from your AWS-hosted workspace under **User Settings > Developer > Access Tokens**. Stored in n8n as a `Ascerta Databricks API` credential (workspace URL + PAT).
 
 **Provider Base URI:** Built automatically as `https://{workspace-id}.cloud.databricks.com/serving-endpoints`.
 
@@ -108,7 +108,7 @@ The workspace ID format is the same as AWS — a numeric identifier. The URL alo
 
 **Provider Base URI:** Built automatically as `https://{workspace-id}.cloud.databricks.com/serving-endpoints` — same shape as AWS.
 
-**Cloud Provider dropdown:** Select **Google Cloud (GCP)**. This is critical for accurate pricing — GCP and AWS have different DBU rates, and selecting the wrong cloud will cause Pay-i to apply the wrong pricing table.
+**Cloud Provider dropdown:** Select **Google Cloud (GCP)**. This is critical for accurate pricing — GCP and AWS have different DBU rates, and selecting the wrong cloud will cause Ascerta to apply the wrong pricing table.
 
 ### Azure
 
@@ -157,18 +157,18 @@ For a model endpoint with a DBU rate of 25.00 input / 200.00 output per 1M token
 
 - **DBU rate per model:** Your Databricks workspace **Serving** page shows the DBU rate for each endpoint
 - **DBU price per cloud:** Your Databricks account console or invoice shows your contracted DBU price
-- **Pay-i tracking:** Pay-i uses the `xProxy-PriceAs-Category` header to select the correct cloud-specific pricing table and calculates the dollar cost per request automatically
+- **Ascerta tracking:** Ascerta uses the `xProxy-PriceAs-Category` header to select the correct cloud-specific pricing table and calculates the dollar cost per request automatically
 
 ## Migration
 
-The n8n migration toolkit automatically detects the following native nodes and replaces them with this Pay-i node:
+The n8n migration toolkit automatically detects the following native nodes and replaces them with this Ascerta node:
 
 - `n8n-nodes-databricks.databricks`
 - `n8n-nodes-databricks.lmChatDatabricks`
 - `n8n-nodes-databricks.databricksAiAgent`
 
-Existing native Databricks credentials (`host` / `token`) are mapped onto the Pay-i `Pay-i Databricks API` credential (`workspaceUrl` / `accessToken`) by the toolkit. The endpoint name is extracted from the native node's `endpoint`, `endpointName`, or `model` parameter. Cloud provider defaults to AWS.
+Existing native Databricks credentials (`host` / `token`) are mapped onto the Ascerta `Ascerta Databricks API` credential (`workspaceUrl` / `accessToken`) by the toolkit. The endpoint name is extracted from the native node's `endpoint`, `endpointName`, or `model` parameter. Cloud provider defaults to AWS.
 
 ---
 
-*For Agent Bricks, historical data import, and other workloads not exposed via `/serving-endpoints`, contact [Pay-i support](https://www.pay-i.com/support) about post-hoc ingestion options.*
+*For Agent Bricks, historical data import, and other workloads not exposed via `/serving-endpoints`, contact [Ascerta support](https://www.ascerta.com/support) about post-hoc ingestion options.*

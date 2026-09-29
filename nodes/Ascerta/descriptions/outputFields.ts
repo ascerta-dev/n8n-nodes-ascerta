@@ -7,7 +7,7 @@ export const outputFields: INodeProperties[] = [
 		type: 'boolean',
 		default: true,
 		description:
-			'Whether to include Pay-i cost tracking data (payiCost) in the output. When disabled, cost data is stripped from the response.',
+			'Whether to include Ascerta cost tracking data (ascertaCost) in the output. When disabled, cost data is stripped from the response.',
 	},
 	{
 		displayName: 'Return Full Response',

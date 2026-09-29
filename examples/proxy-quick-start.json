@@ -1,5 +1,5 @@
 {
-  "name": "Pay-i Proxy Quick Start",
+  "name": "Ascerta Proxy Quick Start",
   "nodes": [
     {
       "parameters": {},
@@ -14,7 +14,7 @@
         "provider": "openai",
         "providerApiKey": "",
         "model": "gpt-4o",
-        "messages": "[{\"role\": \"user\", \"content\": \"What is Pay-i in one sentence?\"}]",
+        "messages": "[{\"role\": \"user\", \"content\": \"What is Ascerta in one sentence?\"}]",
         "rawBody": "",
         "userId": "demo-user",
         "useCaseName": "={{ $workflow.name }}",
@@ -27,15 +27,15 @@
         "returnFullResponse": false,
         "debugLogging": true
       },
-      "id": "payi-1",
-      "name": "Pay-i Proxy",
-      "type": "n8n-nodes-payi.payi",
+      "id": "ascerta-1",
+      "name": "Ascerta Proxy",
+      "type": "n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [220, 300],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     }
@@ -44,7 +44,7 @@
     "Run": {
       "main": [
         [
-          { "node": "Pay-i Proxy", "type": "main", "index": 0 }
+          { "node": "Ascerta Proxy", "type": "main", "index": 0 }
         ]
       ]
     }

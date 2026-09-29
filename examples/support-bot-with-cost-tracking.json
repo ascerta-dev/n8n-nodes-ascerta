@@ -1,5 +1,5 @@
 {
-  "name": "Pay-i Support Bot with Cost Tracking",
+  "name": "Ascerta Support Bot with Cost Tracking",
   "nodes": [
     {
       "parameters": {
@@ -65,21 +65,21 @@
         "returnFullResponse": false,
         "debugLogging": true
       },
-      "id": "payi-1",
-      "name": "Generate Response via Pay-i",
-      "type": "n8n-nodes-payi.payi",
+      "id": "ascerta-1",
+      "name": "Generate Response via Ascerta",
+      "type": "n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [480, 300],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first().json;\nconst answer = response.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';\nconst cost = response.payiCost?.cost?.total?.base || 0;\nconst requestId = response.payiCost?.request_id || null;\n\nreturn [{\n  json: {\n    answer,\n    cost_usd: cost,\n    payi_request_id: requestId,\n    model: response.model\n  }\n}];"
+        "jsCode": "const response = $input.first().json;\nconst answer = response.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';\nconst cost = response.ascertaCost?.cost?.total?.base || 0;\nconst requestId = response.ascertaCost?.request_id || null;\n\nreturn [{\n  json: {\n    answer,\n    cost_usd: cost,\n    ascerta_request_id: requestId,\n    model: response.model\n  }\n}];"
       },
       "id": "code-1",
       "name": "Format Response",
@@ -119,11 +119,11 @@
     "Extract Ticket Fields": {
       "main": [
         [
-          { "node": "Generate Response via Pay-i", "type": "main", "index": 0 }
+          { "node": "Generate Response via Ascerta", "type": "main", "index": 0 }
         ]
       ]
     },
-    "Generate Response via Pay-i": {
+    "Generate Response via Ascerta": {
       "main": [
         [
           { "node": "Format Response", "type": "main", "index": 0 }

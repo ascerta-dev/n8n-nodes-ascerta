@@ -6,14 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Fixed
-- **Docs:** README and deployment guide referenced the wrong Databricks credential type (`databricks` / `databricksApi` from `n8n-nodes-databricks`); corrected to the package's own `payiDatabricksApi` credential. Removed the bogus instruction to install a separate `n8n-nodes-databricks` package.
-- **Docs:** Toolkit link in README pointed at a non-existent repo (`pay-i/payi-n8n-toolkit`); corrected to `Pay-i/utilities`.
-- **Docs:** Removed broken links to `docs/reference/databricks/index.md` (path doesn't exist) in `docs/providers/databricks.md`; replaced with a Pay-i support pointer for Agent Bricks / bulk-ingest workloads.
-- **Docs:** Replaced placeholder Databricks endpoint example `databricks-gpt-5-4` with realistic endpoint names.
-
 ### Changed
 - **SBOM:** Added missing dev dependencies (`@types/node`, `vitest`); refreshed last-updated date.
+
+### Fixed
+- **Docs:** README and deployment guide referenced the wrong Databricks credential type (`databricks` / `databricksApi` from `n8n-nodes-databricks`); corrected to the package's own `ascertaDatabricksApi` credential. Removed the bogus instruction to install a separate `n8n-nodes-databricks` package.
+- **Docs:** Toolkit link in README pointed at a non-existent repo (`ascerta/ascerta-n8n-toolkit`); corrected to `ascerta-dev/utilities`.
+- **Docs:** Removed broken links to `docs/reference/databricks/index.md` (path doesn't exist) in `docs/providers/databricks.md`; replaced with an Ascerta support pointer for Agent Bricks / bulk-ingest workloads.
+- **Docs:** Replaced placeholder Databricks endpoint example `databricks-gpt-5-4` with realistic endpoint names.
 
 ## [1.0.5] - 2026-06-05
 
@@ -23,34 +23,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ## [1.0.4] - 2026-06-03
 
 ### Changed
-- **Use Case ID default is now the n8n execution ID.** New Pay-i nodes added to a workflow default `xProxy-UseCase-ID` to `={{ $execution.id }}` instead of `provider/model/executionId`. Each workflow run gets its own Pay-i use case — calls made within a single execution aggregate together, calls across runs do not. Existing nodes in saved workflows keep their old expression and are unaffected; clear the Use Case ID field on a node to pick up the new default. Use Case Name (workflow name) is unchanged.
+- **Use Case ID default is now the n8n execution ID.** New Ascerta nodes added to a workflow default `xProxy-UseCase-ID` to `={{ $execution.id }}` instead of `provider/model/executionId`. Each workflow run gets its own Ascerta use case — calls made within a single execution aggregate together, calls across runs do not. Existing nodes in saved workflows keep their old expression and are unaffected; clear the Use Case ID field on a node to pick up the new default. Use Case Name (workflow name) is unchanged.
 
 ### Fixed
-- **Use Case Step default no longer throws an expression error.** The previous default `={{ $node.name }}` was invalid — `$node` in n8n is a lookup proxy for *other* nodes, not an accessor for the current node, so the expression threw "The node 'name' doesn't exist." Default is now a literal node display name (e.g. `Pay-i Databricks (Proxy)`), passed in by each node so a sensible Step header is sent without any expression evaluation. Override with a custom label (e.g. "Step 1 - Outline") for multi-step workflows.
-- **Use Case Step now reports the canvas display name** (e.g. `Pay-i DBX #4 - Summarizer`) when the user hasn't overridden the field. Each chat-model node falls back to `this.getNode().name` at runtime, so multi-step workflows show distinct steps in Pay-i instead of one generic label.
-- **Non-ASCII characters in tracking headers are sanitized** (`·` → `-`, `—` → `-`, smart quotes → ASCII). Without this, n8n's HTTP path either threw `ByteString` errors or sent malformed headers that Pay-i 400'd with empty bodies. New `utils/headers.ts` applies to every `xProxy-*` value across all five chat-model nodes.
-- **Pay-i Databricks (Proxy) chat model crashed with `Cannot read properties of undefined (reading 'bind')` on n8n 2.19.x.** `@langchain/openai@1.x` (shipped with current n8n) refactored `ChatOpenAI` so that `completionWithRetry` lives on `model.completions` and `model.responses` sub-objects rather than on the model instance itself. The node patched `model.completionWithRetry` directly, which is `undefined` in 1.x. Patches now apply to both `model.completions` and `model.responses` defensively, with a guard that no-ops if the structure changes again. Also dropped the redacted-then-swap header dance — real headers are now passed straight to the constructor (matching the OpenAI variant), since the post-construction `clientConfig.defaultHeaders` mutation was a fragile workaround whose effect depended on `this.client` being lazily initialized.
+- **Use Case Step default no longer throws an expression error.** The previous default `={{ $node.name }}` was invalid — `$node` in n8n is a lookup proxy for *other* nodes, not an accessor for the current node, so the expression threw "The node 'name' doesn't exist." Default is now a literal node display name (e.g. `Ascerta Databricks (Proxy)`), passed in by each node so a sensible Step header is sent without any expression evaluation. Override with a custom label (e.g. "Step 1 - Outline") for multi-step workflows.
+- **Use Case Step now reports the canvas display name** (e.g. `Ascerta DBX #4 - Summarizer`) when the user hasn't overridden the field. Each chat-model node falls back to `this.getNode().name` at runtime, so multi-step workflows show distinct steps in Ascerta instead of one generic label.
+- **Non-ASCII characters in tracking headers are sanitized** (`·` → `-`, `—` → `-`, smart quotes → ASCII). Without this, n8n's HTTP path either threw `ByteString` errors or sent malformed headers that Ascerta 400'd with empty bodies. New `utils/headers.ts` applies to every `xProxy-*` value across all five chat-model nodes.
+- **Ascerta Databricks (Proxy) chat model crashed with `Cannot read properties of undefined (reading 'bind')` on n8n 2.19.x.** `@langchain/openai@1.x` (shipped with current n8n) refactored `ChatOpenAI` so that `completionWithRetry` lives on `model.completions` and `model.responses` sub-objects rather than on the model instance itself. The node patched `model.completionWithRetry` directly, which is `undefined` in 1.x. Patches now apply to both `model.completions` and `model.responses` defensively, with a guard that no-ops if the structure changes again. Also dropped the redacted-then-swap header dance — real headers are now passed straight to the constructor (matching the OpenAI variant), since the post-construction `clientConfig.defaultHeaders` mutation was a fragile workaround whose effect depended on `this.client` being lazily initialized.
 
 ### Security
-- **`PAYI_FILE_DEBUG=1` no longer writes API keys in plaintext.** The Databricks node's `payiLog()` was dumping full request/response JSON including `xProxy-Api-Key`, `Authorization`, and `openai_api_key`. New `redactSecrets()` masks those values to `***REDACTED***` before each write. Scoped to Databricks (the only node with file-debug logging).
+- **`ASCERTA_FILE_DEBUG=1` no longer writes API keys in plaintext.** The Databricks node's `ascertaLog()` was dumping full request/response JSON including `xProxy-Api-Key`, `Authorization`, and `openai_api_key`. New `redactSecrets()` masks those values to `***REDACTED***` before each write. Scoped to Databricks (the only node with file-debug logging).
 
 ## [1.0.2] - 2026-06-01
 
 ### Added
-- **Auto-populate deployed models** in the Pay-i Databricks (Proxy) chat model node. The `Deployed Model` field is now a searchable resource locator that lists models registered under `system.databricks.<cloudProvider>` in Pay-i's resource catalog, fetched via `GET /api/v1/categories/.../resources` using the configured Pay-i credential. Falls back to a free-text "By Name" mode for models not yet registered. Removes the manual copy-paste step and the typo class of bugs that came with it.
+- **Auto-populate deployed models** in the Ascerta Databricks (Proxy) chat model node. The `Deployed Model` field is now a searchable resource locator that lists models registered under `system.databricks.<cloudProvider>` in Ascerta's resource catalog, fetched via `GET /api/v1/categories/.../resources` using the configured Ascerta credential. Falls back to a free-text "By Name" mode for models not yet registered. Removes the manual copy-paste step and the typo class of bugs that came with it.
 
 ## [0.3.1] - 2026-05-12
 
 ### Changed (Breaking)
-- **Renamed Databricks credential type** from `databricksApi` to `payiDatabricksApi` to avoid a collision with n8n's built-in `databricksApi` credential. n8n 2.19+ ships first-party Databricks support with the same credential type name but different field shape (`host`/`token` vs our `workspaceUrl`/`accessToken`); both registering under the same name caused undefined behavior in the credential registry. Display name changed from "Databricks API" to "Pay-i Databricks API". File and class renamed accordingly. Customers with existing `databricksApi` credentials in this package must recreate them as `Pay-i Databricks API`; zero affected at time of rename (no production deployments).
+- **Renamed Databricks credential type** from `databricksApi` to `ascertaDatabricksApi` to avoid a collision with n8n's built-in `databricksApi` credential. n8n 2.19+ ships first-party Databricks support with the same credential type name but different field shape (`host`/`token` vs our `workspaceUrl`/`accessToken`); both registering under the same name caused undefined behavior in the credential registry. Display name changed from "Databricks API" to "Ascerta Databricks API". File and class renamed accordingly. Customers with existing `databricksApi` credentials in this package must recreate them as `Ascerta Databricks API`; zero affected at time of rename (no production deployments).
 
 ### Added
-- `xProxy-PriceAs-Resource` header now sent by all proxy paths: Pay-i Proxy (all five providers) and the LangChain chat model nodes (OpenAI, Anthropic, Bedrock, Databricks). The value is the model name or serving endpoint name, depending on provider. Azure already sent this header; the addition brings the others in line. Required for Pay-i pricing engine to resolve per-model rates within a category.
-- "Databricks" option in the Cloud Provider dropdown on both the Pay-i Proxy node (when Databricks provider is selected) and the Pay-i Databricks (Proxy) chat model node, for self-hosted, on-premises, or non-major-cloud deployments using `cloud.databricks.com`-pattern URLs. Sends `xProxy-PriceAs-Category: system.databricks.databricks`. Pay-i pricing-table registration for this category is pending (see sysops Q6).
-- `databricksApi` credential wired into the Pay-i Proxy node — when `Provider = Databricks` is selected, the workspace URL and PAT come from a saved n8n credential rather than inline fields.
-- `authenticate` block on the Pay-i Databricks API credential.
-- Credential icons for Pay-i API and Pay-i Databricks API credential types.
-- External codex metadata file (`Payi.node.json`).
+- `xProxy-PriceAs-Resource` header now sent by all proxy paths: Ascerta Proxy (all five providers) and the LangChain chat model nodes (OpenAI, Anthropic, Bedrock, Databricks). The value is the model name or serving endpoint name, depending on provider. Azure already sent this header; the addition brings the others in line. Required for Ascerta pricing engine to resolve per-model rates within a category.
+- "Databricks" option in the Cloud Provider dropdown on both the Ascerta Proxy node (when Databricks provider is selected) and the Ascerta Databricks (Proxy) chat model node, for self-hosted, on-premises, or non-major-cloud deployments using `cloud.databricks.com`-pattern URLs. Sends `xProxy-PriceAs-Category: system.databricks.databricks`. Ascerta pricing-table registration for this category is pending (see sysops Q6).
+- `databricksApi` credential wired into the Ascerta Proxy node — when `Provider = Databricks` is selected, the workspace URL and PAT come from a saved n8n credential rather than inline fields.
+- `authenticate` block on the Ascerta Databricks API credential.
+- Credential icons for Ascerta API and Ascerta Databricks API credential types.
+- External codex metadata file (`Ascerta.node.json`).
 - Deployment & Configuration Guide for self-hosted n8n (`docs/deployment-guide.md`).
 - `CLAUDE.md` project guidance.
 - `SBOM.md` software bill of materials.
@@ -58,11 +58,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Changed
 - **Drop cloud/selfhosted build profile toggle.** The `set-package-nodes.js` script and the `build:cloud` / `build:selfhosted` npm scripts have been removed. `package.json` now statically registers all 6 nodes — same shape as the previously-published 0.3.0 on npm. The toggle was a footgun: any tag-push could publish the cloud profile (1 node) and regress on customers expecting the selfhosted profile (6 nodes). Selfhosted is now the only supported distribution profile. The `npm run build` script is unchanged in behavior; the convenience aliases just go away.
 - HTTP errors now throw `NodeApiError` instead of `NodeOperationError`.
-- `Pay-i Databricks (Proxy)` chat model node uses our `payiDatabricksApi` credential (`workspaceUrl` / `accessToken`) instead of the external `n8n-nodes-databricks` package's `databricks` credential. Removes the hard dependency on a second community package.
+- `Ascerta Databricks (Proxy)` chat model node uses our `ascertaDatabricksApi` credential (`workspaceUrl` / `accessToken`) instead of the external `n8n-nodes-databricks` package's `databricks` credential. Removes the hard dependency on a second community package.
 
 ### Fixed
-- **Databricks proxy URL pattern.** Replaced the fabricated `<workspace>.ai-gateway.<domain>/mlflow` URL with the correct `<workspace>/serving-endpoints` path. The fabricated `ai-gateway` subdomain doesn't exist as a real Databricks endpoint and was being rejected by Pay-i's proxy with `invalid_provider_host`. Affects both the generic Pay-i Proxy node's Databricks branch and the Pay-i Databricks (Proxy) chat model node.
-- Pay-i Proxy node showed no credential setup when `Provider = Databricks` was selected — workspace URL and PAT had to be pasted inline. Now uses the `Pay-i Databricks API` credential dropdown, matching the ergonomics of the other provider chat model nodes.
+- **Databricks proxy URL pattern.** Replaced the fabricated `<workspace>.ai-gateway.<domain>/mlflow` URL with the correct `<workspace>/serving-endpoints` path. The fabricated `ai-gateway` subdomain doesn't exist as a real Databricks endpoint and was being rejected by Ascerta's proxy with `invalid_provider_host`. Affects both the generic Ascerta Proxy node's Databricks branch and the Ascerta Databricks (Proxy) chat model node.
+- Ascerta Proxy node showed no credential setup when `Provider = Databricks` was selected — workspace URL and PAT had to be pasted inline. Now uses the `Ascerta Databricks API` credential dropdown, matching the ergonomics of the other provider chat model nodes.
 - Asset copy script now handles credentials directory and `.json` files.
 - OpenAI / Anthropic / Azure / Bedrock provider docs upgraded with pricing context, endpoint routing details, and per-provider quirks.
 - `eslint` upgraded from 8.57 to 10.x with flat config (`eslint.config.mjs`).
@@ -82,15 +82,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - Provider-specific chat model nodes for OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, and Databricks
-- `PayiChatModelAnthropic.node.ts` — uses native `anthropicApi` credential
-- `PayiChatModelAzure.node.ts` — uses native `azureOpenAiApi` credential
-- `PayiChatModelBedrock.node.ts` — uses native `aws` credential
-- `PayiChatModelDatabricks.node.ts` — uses native `databricks` credential
+- `AscertaChatModelAnthropic.node.ts` — uses native `anthropicApi` credential
+- `AscertaChatModelAzure.node.ts` — uses native `azureOpenAiApi` credential
+- `AscertaChatModelBedrock.node.ts` — uses native `aws` credential
+- `AscertaChatModelDatabricks.node.ts` — uses native `databricks` credential
 - `DatabricksApi.credentials.ts` — Databricks credential type
 - Per-provider documentation in `docs/providers/`
 
 ### Changed
-- Original `PayiChatModel.node.ts` now serves as the OpenAI-specific chat model
+- Original `AscertaChatModel.node.ts` now serves as the OpenAI-specific chat model
 - README rewritten with provider table and migration toolkit reference
 
 ## [0.2.4] - 2026-03-01
@@ -119,25 +119,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ## [0.2.0] - 2026-02-23
 
 ### Added
-- **Pay-i Chat Model** node for AI Agent integration (`lmChatPayi`)
+- **Ascerta Chat Model** node for AI Agent integration (`lmChatAscerta`)
   - LangChain-compatible chat model that plugs into n8n's AI Agent node
-  - Routes OpenAI-compatible requests through the Pay-i proxy
-  - Supports all Pay-i tracking headers (User ID, Use Case, Limits, etc.)
+  - Routes OpenAI-compatible requests through the Ascerta proxy
+  - Supports all Ascerta tracking headers (User ID, Use Case, Limits, etc.)
   - Configurable model options: temperature, max tokens, frequency/presence penalty, top P, timeout, max retries
 - Example workflow: `ai-agent-chat.json`
 
 ## [0.1.0] - 2026-02-19
 
 ### Added
-- Initial release of the Pay-i Proxy node for n8n
+- Initial release of the Ascerta Proxy node for n8n
 - Supported providers: OpenAI, Anthropic, Azure OpenAI, AWS Bedrock
-- Pay-i tracking headers: xProxy-Request-Tags, xProxy-User-ID, xProxy-UseCase-Name, xProxy-UseCase-ID, xProxy-UseCase-Version, xProxy-UseCase-Step, xProxy-UseCase-Properties, xProxy-Limit-IDs
-- Cost data output (payiCost) with toggle
+- Ascerta tracking headers: xProxy-Request-Tags, xProxy-User-ID, xProxy-UseCase-Name, xProxy-UseCase-ID, xProxy-UseCase-Version, xProxy-UseCase-Step, xProxy-UseCase-Properties, xProxy-Limit-IDs
+- Cost data output (ascertaCost) with toggle
 - Raw Request Body Override
 - Debug Logging with masked API keys and redacted body content
 
 ### Security
-- HTTPS enforcement on Pay-i Base URL
+- HTTPS enforcement on Ascerta Base URL
 - Header injection protection
 - API key masking in debug logs
 - Request body redacted to shapes only in debug logs

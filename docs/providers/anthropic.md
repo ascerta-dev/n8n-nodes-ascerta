@@ -1,14 +1,14 @@
-# Pay-i Anthropic (Proxy)
+# Ascerta Anthropic (Proxy)
 
-Routes Anthropic Claude chat model requests through the Pay-i proxy for cost tracking, budget enforcement, and usage analytics.
+Routes Anthropic Claude chat model requests through the Ascerta proxy for cost tracking, budget enforcement, and usage analytics.
 
 ## Node Details
 
 | Property | Value |
 |----------|-------|
-| Display Name | Pay-i Anthropic (Proxy) |
-| Node Name | `lmChatPayiAnthropic` |
-| n8n Type | `n8n-nodes-payi.lmChatPayiAnthropic` |
+| Display Name | Ascerta Anthropic (Proxy) |
+| Node Name | `lmChatAscertaAnthropic` |
+| n8n Type | `n8n-nodes-ascerta.lmChatAscertaAnthropic` |
 | LangChain Class | `ChatAnthropic` (`@langchain/anthropic`) |
 | Proxy Path | `/api/v1/proxy/anthropic` |
 
@@ -16,10 +16,10 @@ Routes Anthropic Claude chat model requests through the Pay-i proxy for cost tra
 
 | Credential | Type | Source |
 |------------|------|--------|
-| Pay-i API | `payiApi` | Pay-i community node |
+| Ascerta API | `ascertaApi` | Ascerta community node |
 | Anthropic API | `anthropicApi` | Built-in n8n credential |
 
-Both credentials are required. The Pay-i API key authenticates with the proxy; the Anthropic API key is forwarded to Anthropic for model authorization.
+Both credentials are required. The Ascerta API key authenticates with the proxy; the Anthropic API key is forwarded to Anthropic for model authorization.
 
 ## Parameters
 
@@ -42,11 +42,11 @@ Both credentials are required. The Pay-i API key authenticates with the proxy; t
 
 ```
 n8n Workflow
-  └─ Pay-i Anthropic (Proxy)
-       ├─ Credentials: Pay-i API key + Anthropic API key
-       └─ POST {payiBaseUrl}/api/v1/proxy/anthropic/v1/messages
+  └─ Ascerta Anthropic (Proxy)
+       ├─ Credentials: Ascerta API key + Anthropic API key
+       └─ POST {ascertaBaseUrl}/api/v1/proxy/anthropic/v1/messages
             Headers:
-              xProxy-Api-Key:          {payi_key}
+              xProxy-Api-Key:          {ascerta_key}
               xProxy-User-ID:          {userId}           (if set)
               xProxy-UseCase-Name:     {useCaseName}      (if set)
               xProxy-UseCase-ID:       {useCaseId}        (if set)
@@ -58,11 +58,11 @@ n8n Workflow
               anthropic-version:       2023-06-01
 ```
 
-The node uses `ChatAnthropic` from `@langchain/anthropic` with `anthropicApiUrl` pointed at the Pay-i proxy (`{payiBaseUrl}/api/v1/proxy/anthropic`). Pay-i intercepts the request, records cost and usage data, applies any active budget limits, then transparently forwards it to Anthropic's Messages API.
+The node uses `ChatAnthropic` from `@langchain/anthropic` with `anthropicApiUrl` pointed at the Ascerta proxy (`{ascertaBaseUrl}/api/v1/proxy/anthropic`). Ascerta intercepts the request, records cost and usage data, applies any active budget limits, then transparently forwards it to Anthropic's Messages API.
 
-**Auth split:** The Pay-i API key travels in `defaultHeaders` as `xProxy-Api-Key`. The Anthropic API key is passed to the `ChatAnthropic` constructor as `anthropicApiKey`, which the LangChain SDK sends as the standard `x-api-key` header. Pay-i's proxy reads `x-api-key` to authenticate with Anthropic on your behalf.
+**Auth split:** The Ascerta API key travels in `defaultHeaders` as `xProxy-Api-Key`. The Anthropic API key is passed to the `ChatAnthropic` constructor as `anthropicApiKey`, which the LangChain SDK sends as the standard `x-api-key` header. Ascerta's proxy reads `x-api-key` to authenticate with Anthropic on your behalf.
 
-**Tracking headers** (`xProxy-*`) are only added when the corresponding tracking field is populated. They carry cost attribution metadata — user ID, use case name/ID/version/step, custom properties, and budget limit references — that Pay-i uses to aggregate spend by dimension.
+**Tracking headers** (`xProxy-*`) are only added when the corresponding tracking field is populated. They carry cost attribution metadata — user ID, use case name/ID/version/step, custom properties, and budget limit references — that Ascerta uses to aggregate spend by dimension.
 
 ## Extended Thinking
 
@@ -104,9 +104,9 @@ A common misconfiguration is setting Max Tokens too low while enabling a large T
 
 Thinking tokens are billed by Anthropic at the **output token rate** — the same rate as the visible response. A request with a 10,000-token thinking budget can therefore incur up to 10,000 additional output-rate tokens on top of the visible response, even though the thinking content is not returned to the caller.
 
-Pay-i tracks thinking tokens through the custom token usage parser (`llmOutput.usage.input_tokens` + `output_tokens`), so thinking costs appear correctly in Pay-i's cost dashboards and are counted against any active budget limits.
+Ascerta tracks thinking tokens through the custom token usage parser (`llmOutput.usage.input_tokens` + `output_tokens`), so thinking costs appear correctly in Ascerta's cost dashboards and are counted against any active budget limits.
 
-**Practical guidance:** Start with the default 10,000-token budget and monitor Pay-i's token usage dashboard before increasing it. For production workflows, set a Limit in Pay-i to cap spending if thinking consumption exceeds expectations.
+**Practical guidance:** Start with the default 10,000-token budget and monitor Ascerta's token usage dashboard before increasing it. For production workflows, set a Limit in Ascerta to cap spending if thinking consumption exceeds expectations.
 
 ## Anthropic Pricing
 
@@ -116,13 +116,13 @@ Key billing points for this node:
 
 - **Input tokens** — prompt text, conversation history, system prompts.
 - **Output tokens** — the visible model response.
-- **Thinking tokens** — billed at the output token rate; tracked separately by Pay-i. They do not appear in the response but count against your Anthropic invoice and any active Pay-i Limits.
+- **Thinking tokens** — billed at the output token rate; tracked separately by Ascerta. They do not appear in the response but count against your Anthropic invoice and any active Ascerta Limits.
 
-Pay-i records all three token categories (via the custom `tokensUsageParser`) and surfaces them in cost breakdowns and Use Case rollups.
+Ascerta records all three token categories (via the custom `tokensUsageParser`) and surfaces them in cost breakdowns and Use Case rollups.
 
 ## Migration
 
-The n8n migration toolkit automatically detects the following native node and replaces it with this Pay-i node:
+The n8n migration toolkit automatically detects the following native node and replaces it with this Ascerta node:
 
 - `@n8n/n8n-nodes-langchain.lmChatAnthropic`
 

@@ -7,7 +7,7 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
 
-import { chatModelBedrockFields } from './descriptions/chatModelBedrockFields';
+import { chatModelAnthropicFields } from './descriptions/chatModelAnthropicFields';
 import { createTrackingFields } from './descriptions/trackingFields';
 import { versionNotice } from './descriptions/versionNotice';
 import { sanitizeHeaderValue } from './utils/headers';
@@ -16,17 +16,17 @@ import { sanitizeHeaderValue } from './utils/headers';
 // Declared here so TypeScript accepts the require() calls.
 declare function require(module: string): any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-export class PayiChatModelBedrock implements INodeType {
+export class AscertaChatModelAnthropic implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Pay-i Amazon Bedrock (Proxy)',
-		name: 'lmChatPayiBedrock',
-		icon: 'file:payi_logo.png',
+		displayName: 'Ascerta Anthropic (Proxy)',
+		name: 'lmChatAscertaAnthropic',
+		icon: 'file:ascerta_logo.svg',
 		group: ['transform'],
 		version: [1],
 		description:
-			'Amazon Bedrock chat model routed through Pay-i proxy for cost tracking and budget enforcement',
+			'Anthropic chat model routed through Ascerta proxy for cost tracking and budget enforcement',
 		defaults: {
-			name: 'Pay-i Amazon Bedrock (Proxy)',
+			name: 'Ascerta Anthropic (Proxy)',
 		},
 		codex: {
 			categories: ['AI'],
@@ -40,37 +40,33 @@ export class PayiChatModelBedrock implements INodeType {
 		outputNames: ['Model'],
 		credentials: [
 			{
-				name: 'payiApi',
+				name: 'ascertaApi',
 				required: true,
 			},
 			{
-				name: 'aws',
+				name: 'anthropicApi',
 				required: true,
 			},
 		],
 		properties: [
-			...chatModelBedrockFields,
-			...createTrackingFields('bedrock', 'model', 'Pay-i Amazon Bedrock (Proxy)'),
+			...chatModelAnthropicFields,
+			...createTrackingFields('anthropic', 'model', 'Ascerta Anthropic (Proxy)'),
 			...versionNotice,
 		],
 	};
 
 	async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
 		// Runtime imports — resolved through n8n's VM context, not bundled
-		const { ChatBedrockConverse } = require('@langchain/aws');
+		const { ChatAnthropic } = require('@langchain/anthropic');
 		const { N8nLlmTracing, makeN8nLlmFailedAttemptHandler } = require('@n8n/ai-utilities');
 
-		const payiCredentials = await this.getCredentials('payiApi');
-		const payiBaseUrl = (payiCredentials.baseUrl as string).replace(/\/+$/, '');
-		const payiApiKey = payiCredentials.apiKey as string;
+		const ascertaCredentials = await this.getCredentials('ascertaApi');
+		const ascertaBaseUrl = (ascertaCredentials.baseUrl as string).replace(/\/+$/, '');
+		const ascertaApiKey = ascertaCredentials.apiKey as string;
 
-		const awsCredentialsRaw = await this.getCredentials('aws');
-		const awsAccessKeyId = awsCredentialsRaw.accessKeyId as string;
-		const awsSecretAccessKey = awsCredentialsRaw.secretAccessKey as string;
-		const awsSessionToken = (awsCredentialsRaw.sessionToken as string) || '';
-
-		const modelId = this.getNodeParameter('model', itemIndex) as string;
-		const region = this.getNodeParameter('region', itemIndex, (awsCredentialsRaw.region as string) || 'us-east-1') as string;
+		const providerCredentials = await this.getCredentials('anthropicApi');
+		const providerApiKey = providerCredentials.apiKey as string;
+		const modelName = this.getNodeParameter('model', itemIndex) as string;
 		const options = this.getNodeParameter('options', itemIndex, {}) as Record<string, unknown>;
 
 		// Build tracking headers
@@ -81,11 +77,11 @@ export class PayiChatModelBedrock implements INodeType {
 		// Advanced tracking fields (collapsed in UI under "Advanced Tracking")
 		const advancedTracking = this.getNodeParameter('advancedTracking', itemIndex, {}) as Record<string, string>;
 		const useCaseVersion = advancedTracking.useCaseVersion || '';
-		// Canvas display name (e.g. "Pay-i Bedrock #4 - Summarizer") is more useful in
-		// Pay-i's dashboard than the generic node-type label. If the user hasn't
+		// Canvas display name (e.g. "Ascerta Anthropic #4 - Summarizer") is more useful in
+		// Ascerta's dashboard than the generic node-type label. If the user hasn't
 		// changed the parameter from its hard-coded default, swap in the canvas name.
 		let useCaseStep = this.getNodeParameter('useCaseStep', itemIndex, '') as string;
-		if (!useCaseStep || useCaseStep === 'Pay-i Amazon Bedrock (Proxy)') {
+		if (!useCaseStep || useCaseStep === 'Ascerta Anthropic (Proxy)') {
 			useCaseStep = this.getNode().name;
 		}
 		const useCaseProperties = advancedTracking.useCaseProperties || '';
@@ -102,48 +98,79 @@ export class PayiChatModelBedrock implements INodeType {
 		}
 		if (limitIds) trackingHeaders['xProxy-Limit-IDs'] = sanitizeHeaderValue(limitIds);
 
-		// Build AWS credentials
-		const awsCredentials: Record<string, string> = {
-			accessKeyId: awsAccessKeyId,
-			secretAccessKey: awsSecretAccessKey,
+		// Token usage parser for Anthropic response format
+		const tokensUsageParser = (result: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+			const usage = result?.llmOutput?.usage ?? {
+				input_tokens: 0,
+				output_tokens: 0,
+			};
+			return {
+				completionTokens: usage.output_tokens,
+				promptTokens: usage.input_tokens,
+				totalTokens: usage.input_tokens + usage.output_tokens,
+			};
 		};
-		if (awsSessionToken) {
-			awsCredentials.sessionToken = awsSessionToken;
+
+		// Handle thinking / extended reasoning mode
+		let invocationKwargs: Record<string, unknown> = {};
+		if (options.thinking) {
+			invocationKwargs = {
+				thinking: {
+					type: 'enabled',
+					budget_tokens: (options.thinkingBudget as number) ?? 10000,
+				},
+				max_tokens: (options.maxTokensToSample as number) ?? 4096,
+				temperature: undefined,
+				top_k: undefined,
+				top_p: undefined,
+			};
 		}
 
-		// Route through Pay-i Bedrock proxy
-		// The proxy URL replaces the Bedrock endpoint host
-		const proxyHost = `${payiBaseUrl}/api/v1/proxy/aws.bedrock`.replace(/^https?:\/\//, '');
-		const additionalHeaders: Record<string, string> = {
-			'xProxy-Api-Key': payiApiKey,
-			'xProxy-PriceAs-Resource': modelId,
+		const anthropicBaseUrl = `${ascertaBaseUrl}/api/v1/proxy/anthropic`;
+		const defaultHeaders: Record<string, string> = {
+			'xProxy-Api-Key': ascertaApiKey,
+			'xProxy-PriceAs-Resource': modelName,
 			...trackingHeaders,
 		};
 
 		if (debugLogging) {
 			const mask = (v: string) => v.length <= 8 ? '****' : v.substring(0, 8) + '****';
-			this.logger.info(`[Pay-i Bedrock] ──── DEBUG (item ${itemIndex}) ────`);
-			this.logger.info(`[Pay-i Bedrock] model="${modelId}" region="${region}" proxyHost="${proxyHost}"`);
+			this.logger.info(`[Ascerta Anthropic] ──── DEBUG (item ${itemIndex}) ────`);
+			this.logger.info(`[Ascerta Anthropic] model="${modelName}" baseURL="${anthropicBaseUrl}"`);
 			const masked = Object.fromEntries(
-				Object.entries(additionalHeaders).map(([k, v]) =>
+				Object.entries(defaultHeaders).map(([k, v]) =>
 					k === 'xProxy-Api-Key' ? [k, mask(v)] : [k, v],
 				),
 			);
-			this.logger.info(`[Pay-i Bedrock] Headers: ${JSON.stringify(masked, null, 2)}`);
+			this.logger.info(`[Ascerta Anthropic] Headers: ${JSON.stringify(masked, null, 2)}`);
+			if (options.thinking) {
+				this.logger.info(`[Ascerta Anthropic] Thinking mode enabled, budget=${(options.thinkingBudget as number) ?? 10000}`);
+			}
 		}
 
-		const model = new ChatBedrockConverse({
-			model: modelId,
-			region,
-			credentials: awsCredentials,
-			endpointHost: proxyHost,
+		const model = new ChatAnthropic({
+			anthropicApiKey: providerApiKey,
+			model: modelName,
+			anthropicApiUrl: anthropicBaseUrl,
+			maxTokens: options.maxTokensToSample as number | undefined,
 			temperature: options.temperature as number | undefined,
-			maxTokens: options.maxTokens as number | undefined,
+			topK: options.topK as number | undefined,
 			topP: options.topP as number | undefined,
-			additionalHeaders,
-			callbacks: [new N8nLlmTracing(this)],
+			invocationKwargs,
+			clientOptions: {
+				defaultHeaders,
+			},
+			callbacks: [new N8nLlmTracing(this, { tokensUsageParser })],
 			onFailedAttempt: makeN8nLlmFailedAttemptHandler(this),
 		});
+
+		// Clean up undefined topP / temperature so the SDK doesn't send them
+		if (options.topP === undefined) {
+			delete (model as any).topP; // eslint-disable-line @typescript-eslint/no-explicit-any
+		}
+		if (options.topP !== undefined && options.temperature === undefined) {
+			delete (model as any).temperature; // eslint-disable-line @typescript-eslint/no-explicit-any
+		}
 
 		return {
 			response: model,
