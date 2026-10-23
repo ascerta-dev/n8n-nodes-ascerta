@@ -142,6 +142,11 @@ npm run lint:fix  # ESLint with auto-fix
 npm run format    # Prettier
 ```
 
+Dependency lifecycle scripts are disabled by `.npmrc`. Run `npm run build` explicitly
+before `npm pack` or `npm publish`; the publish workflow does this automatically.
+The build script lists assets explicitly in `scripts/copy-icons.js`; add new icons
+or node metadata files there when needed.
+
 ### Local Testing
 
 ```bash
