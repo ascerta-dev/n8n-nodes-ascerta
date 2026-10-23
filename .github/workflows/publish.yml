@@ -24,6 +24,8 @@ jobs:
       # n8n-workflow's transitive deps). We don't need those compiled for the
       # publish step — only dist/ is published (per `files` in package.json).
       - run: npm ci --ignore-scripts
+      # Lifecycle scripts are disabled by .npmrc, so build explicitly before publishing.
+      - run: npm run build
       # Trusted Publishing via OIDC — no token needed.
       # Requires id-token: write permission (set above) AND the workflow
       # registered as a trusted publisher on npmjs.com with permission for npm publish.

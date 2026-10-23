@@ -4,38 +4,20 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const ROOT = path.resolve(__dirname, '..');
-const EXTENSIONS = new Set(['.svg', '.png', '.json']);
+// List build assets explicitly: directory entries cannot select filesystem paths.
+fs.mkdirSync(path.resolve(__dirname, '../dist/nodes/Ascerta'), { recursive: true });
+fs.mkdirSync(path.resolve(__dirname, '../dist/credentials'), { recursive: true });
+fs.copyFileSync(
+	path.resolve(__dirname, '../nodes/Ascerta/ascerta_logo.svg'),
+	path.resolve(__dirname, '../dist/nodes/Ascerta/ascerta_logo.svg'),
+);
+fs.copyFileSync(
+	path.resolve(__dirname, '../nodes/Ascerta/Ascerta.node.json'),
+	path.resolve(__dirname, '../dist/nodes/Ascerta/Ascerta.node.json'),
+);
+fs.copyFileSync(
+	path.resolve(__dirname, '../credentials/ascerta_logo.svg'),
+	path.resolve(__dirname, '../dist/credentials/ascerta_logo.svg'),
+);
 
-const DIRS = [
-	{ src: path.join(ROOT, 'nodes'), dest: path.join(ROOT, 'dist', 'nodes') },
-	{ src: path.join(ROOT, 'credentials'), dest: path.join(ROOT, 'dist', 'credentials') },
-];
-
-let count = 0;
-
-function walk(srcRoot, destRoot, dir) {
-	dir = dir || srcRoot;
-	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-		const fullPath = path.join(dir, entry.name);
-		if (entry.isDirectory()) {
-			walk(srcRoot, destRoot, fullPath);
-			continue;
-		}
-		if (!EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
-
-		const relPath = path.relative(srcRoot, fullPath);
-		const destFile = path.join(destRoot, relPath);
-
-		fs.mkdirSync(path.dirname(destFile), { recursive: true });
-		fs.copyFileSync(fullPath, destFile);
-		console.log(`  copied: ${relPath}`);
-		count++;
-	}
-}
-
-for (const { src, dest } of DIRS) {
-	if (fs.existsSync(src)) walk(src, dest);
-}
-
-console.log(`copy-icons: ${count} file(s) copied to dist/`);
+console.log('copy-icons: 3 file(s) copied to dist/');
